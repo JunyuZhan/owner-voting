@@ -52,7 +52,7 @@ public class SecurityConfig {
             // 配置CSRF
             .csrf(csrf -> csrf
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/api/auth/login", "/api/auth/refresh"))
+                .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/admin/login", "/api/v1/auth/refresh"))
             // 配置会话管理
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -65,7 +65,18 @@ public class SecurityConfig {
                 .contentTypeOptions(contentType -> contentType.disable()))
             // 请求授权
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/error/**").permitAll()
+                .requestMatchers(
+                    "/api/v1/auth/login",
+                    "/api/v1/auth/admin/login",
+                    "/api/v1/auth/refresh",
+                    "/api/admin/login",
+                    "/api/error/**",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/swagger-resources/**",
+                    "/webjars/**"
+                ).permitAll()
                 .requestMatchers("/api/admin/**").hasAnyRole("SYSTEM_ADMIN", "COMMUNITY_ADMIN")
                 .requestMatchers("/api/monitor/**").hasRole("SYSTEM_ADMIN")
                 .anyRequest().authenticated())

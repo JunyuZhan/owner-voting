@@ -14,10 +14,6 @@
         <el-form-item label="手机号" prop="mobile">
           <el-input v-model="form.mobile" size="large" />
         </el-form-item>
-        <el-form-item label="验证码" prop="code" class="captcha-item">
-          <el-input v-model="form.code" size="large" style="width: 120px; margin-right: 8px;" />
-          <img :src="captchaUrl" @click="refreshCaptcha" class="captcha-image" title="点击刷新验证码" />
-        </el-form-item>
         <el-form-item>
           <el-button type="primary" :loading="loading" @click="handleRegister" size="large" round>注册</el-button>
         </el-form-item>
@@ -44,8 +40,7 @@ const form = ref({
   userName: '',
   password: '',
   confirmPassword: '',
-  mobile: '',
-  code: ''
+  mobile: ''
 })
 
 const rules = {
@@ -53,13 +48,18 @@ const rules = {
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   confirmPassword: [
     { required: true, message: '请确认密码', trigger: 'blur' },
-    { validator: (rule, value) => value === form.value.password, message: '两次密码不一致', trigger: 'blur' }
+    { validator: (rule, value, callback) => {
+      if (value !== form.value.password) {
+        callback(new Error('两次输入的密码不一致'))
+      } else {
+        callback()
+      }
+    }, trigger: 'blur' }
   ],
   mobile: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1\d{10}$/, message: '手机号格式不正确', trigger: 'blur' }
-  ],
-  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
+  ]
 }
 
 const refreshCaptcha = () => {
@@ -76,8 +76,7 @@ const handleRegister = async () => {
       body: JSON.stringify({
         userName: form.value.userName,
         password: form.value.password,
-        mobile: form.value.mobile,
-        code: form.value.code
+        mobile: form.value.mobile
       })
     })
     const data = await res.json()

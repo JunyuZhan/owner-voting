@@ -4,11 +4,11 @@ VALUES ('示范小区', '北京市海淀区中关村大街1号', '这是一个�
 
 -- 创建系统管理员账号
 INSERT INTO admin_user (username, password_hash, name, role, enabled, created_at, updated_at) 
-VALUES ('admin', '$2a$10$tL6PD.GOlLAoOX8c5nNyPuJvwzP1xsj8BOzXDuWnMN0JnjY41gG7u', '系统管理员', 'SYSTEM_ADMIN', TRUE, NOW(), NOW());
+VALUES ('admin', '123456', '系统管理员', 'SYSTEM_ADMIN', TRUE, NOW(), NOW());
 
 -- 创建社区管理员账号
 INSERT INTO admin_user (username, password_hash, name, role, community_id, enabled, created_at, updated_at) 
-VALUES ('community_admin', '$2a$10$tL6PD.GOlLAoOX8c5nNyPuJvwzP1xsj8BOzXDuWnMN0JnjY41gG7u', '社区管理员', 'COMMUNITY_ADMIN', 1, TRUE, NOW(), NOW());
+VALUES ('community_admin', '123456', '社区管理员', 'COMMUNITY_ADMIN', 1, TRUE, NOW(), NOW());
 
 -- 创建测试业主账号
 INSERT INTO owner (phone, name, id_card, password_hash, is_verified, status, community_id, created_at, updated_at)
