@@ -1,6 +1,6 @@
 import axios from 'axios';
 import router from '@/router';
-import { useUserStore } from '@/stores/user';
+import { useUserStore } from '@/store/user';
 
 // 创建axios实例
 const axiosInstance = axios.create({

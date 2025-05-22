@@ -102,7 +102,7 @@
 
 1. 克隆项目
 ```bash
-git clone https://github.com/your-username/owner-voting.git
+git clone https://github.com/junyuzhan/owner-voting.git
 cd owner-voting
 ```
 
@@ -167,4 +167,4 @@ https://your-domain-or-ip
 
 ## 联系方式
 
-项目维护者 - your-email@example.com
+项目维护者 - junyuzhan@outlook.com

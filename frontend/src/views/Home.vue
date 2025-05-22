@@ -1,56 +1,39 @@
 <template>
-  <div class="home-bg">
-    <div class="hero">
-      <svg class="hero-bg-left" width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="160" cy="160" r="160" fill="url(#leftGradient)" fill-opacity="0.18"/>
-        <defs>
-          <radialGradient id="leftGradient" cx="0.5" cy="0.5" r="0.5" fx="0.3" fy="0.3">
-            <stop stop-color="#4F8FFF"/>
-            <stop offset="1" stop-color="#fff" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-      </svg>
-      <svg class="hero-bg-right" width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="160" cy="160" r="160" fill="url(#rightGradient)" fill-opacity="0.18"/>
-        <defs>
-          <radialGradient id="rightGradient" cx="0.5" cy="0.5" r="0.5" fx="0.7" fy="0.7">
-            <stop stop-color="#00C48C"/>
-            <stop offset="1" stop-color="#fff" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-      </svg>
-      <div class="hero-inner">
-        <div class="hero-content">
-          <img src="https://dummyimage.com/128x128/4f8fff/fff.png&text=LOGO" alt="logo" class="logo" />
-          <h1>业主线上投票与自治系统</h1>
-          <p class="subtitle">让小区治理更高效、更透明、更有温度</p>
-          <el-button type="primary" size="large" class="cta-btn" @click="goLogin">立即登录体验</el-button>
+  <div class="home-page">
+    <div class="home-hero-bg">
+      <div class="home-hero-inner">
+        <AppCard class="home-hero-card" :body-style="{padding: '48px 40px 40px 40px'}">
+          <div class="home-hero-content">
+            <img src="https://dummyimage.com/64x64/4f8fff/fff.png&text=LOGO" alt="logo" class="logo" />
+            <div>
+              <h1 class="home-title">业主线上投票与自治系统</h1>
+              <p class="home-subtitle">让小区治理更高效、更透明、更有温度</p>
+              <el-button type="primary" size="large" @click="goLogin" round>立即登录体验</el-button>
+            </div>
+          </div>
+        </AppCard>
+      </div>
+    </div>
+    <AppCard class="home-main-card">
+      <div class="home-features">
+        <div v-for="f in features" :key="f.title" class="feature-item">
+          <div class="icon" v-html="f.icon"></div>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.desc }}</p>
         </div>
-        <img class="hero-illustration" src="https://assets-global.website-files.com/5d9bc5d562ffc2869b73b2f8/63e3e2e2e2e2e2e2e2e2e2e2_community-illustration.svg" alt="社区插画" />
       </div>
-    </div>
-    <div class="features">
-      <div class="feature-card" v-for="f in features" :key="f.title">
-        <div class="icon" v-html="f.icon"></div>
-        <h3>{{ f.title }}</h3>
-        <p>{{ f.desc }}</p>
-      </div>
-    </div>
-    <div class="testimonial">
-      <div class="testimonial-content">
+      <div class="home-testimonial">
         <div class="quote">“自从用了这个系统，业主参与度提升了，管理也更轻松了！”</div>
         <div class="author">—— 某小区业委会主任</div>
       </div>
-    </div>
-    <footer class="footer">
-      <span>© 2024 业主自治系统</span>
-      <span style="margin-left: 16px; color: #aaa;">让每一位业主都能参与社区治理</span>
-    </footer>
+    </AppCard>
+    <div class="home-footer">© 2024 业主自治系统 · 让每一位业主都能参与社区治理</div>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
+import AppCard from '../components/AppCard.vue'
 const router = useRouter()
 const goLogin = () => {
   router.push('/login')
@@ -80,156 +63,111 @@ const features = [
 </script>
 
 <style scoped>
-.home-bg {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+.home-page {
+  width: 100%;
+  padding: 0 16px 32px 16px;
+}
+.home-hero-bg {
   width: 100%;
   min-width: 0;
-  overflow-x: hidden;
-}
-.hero {
-  width: 100%;
   background: linear-gradient(90deg, #4f8fff 0%, #00c48c 100%);
-  color: #fff;
+  border-radius: 0 0 32px 32px;
+  padding-top: 48px;
+  padding-bottom: 64px;
+  margin-bottom: -64px;
   position: relative;
-  border-radius: 0 0 24px 24px;
-  padding: 64px 0 32px 0;
-  overflow: hidden;
 }
-.hero-inner {
-  max-width: 1200px;
+.home-hero-inner {
+  width: 100%;
   margin: 0 auto;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
 }
-.hero-content {
-  z-index: 2;
-  max-width: 480px;
-  text-align: left;
+.home-hero-card {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  box-shadow: var(--el-box-shadow-light);
+}
+.home-hero-content {
+  display: flex;
+  align-items: center;
+  gap: 32px;
 }
 .logo {
-  width: 56px;
-  margin-bottom: 16px;
+  width: 64px;
+  height: 64px;
+  margin-right: 16px;
 }
-.hero h1 {
-  font-size: 2.6em;
+.home-title {
+  font-size: 2.2em;
   font-weight: 700;
-  margin-bottom: 12px;
-}
-.subtitle {
-  font-size: 1.25em;
-  margin-bottom: 28px;
-  color: #e0f2ff;
-}
-.cta-btn {
-  font-size: 1.1em;
-  padding: 12px 36px;
-  border-radius: 24px;
-  box-shadow: 0 4px 16px rgba(79,143,255,0.18);
-  transition: background 0.2s, box-shadow 0.2s;
-}
-.cta-btn:hover {
-  background: #005be4;
-  box-shadow: 0 6px 24px rgba(79,143,255,0.28);
-}
-.hero-illustration {
-  width: 340px;
-  margin-left: 48px;
-  z-index: 1;
-  filter: drop-shadow(0 8px 32px rgba(0,0,0,0.08));
-  display: none;
-}
-@media (min-width: 900px) {
-  .hero-illustration {
-    display: block;
-  }
-}
-.features {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 32px;
-  margin: 48px 0 0 0;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.feature-card {
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  padding: 32px 24px 24px 24px;
-  width: 240px;
-  text-align: center;
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-.feature-card:hover {
-  box-shadow: 0 8px 32px rgba(79,143,255,0.13);
-  transform: translateY(-4px) scale(1.03);
-}
-.icon {
-  margin-bottom: 16px;
-}
-.feature-card h3 {
-  font-size: 1.18em;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   color: #222;
 }
-.feature-card p {
+.home-subtitle {
+  font-size: 1.1em;
   color: #666;
-  font-size: 1em;
+  margin-bottom: 18px;
 }
-.testimonial {
-  margin: 64px 0 0 0;
+.home-main-card {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto 32px auto;
+  padding: 32px 0;
+  box-shadow: var(--el-box-shadow-light);
+}
+.home-features {
   display: flex;
-  justify-content: center;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: space-between;
+  margin-bottom: 32px;
 }
-.testimonial-content {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  padding: 32px 40px;
-  max-width: 520px;
+.feature-item {
+  flex: 1 1 200px;
+  min-width: 220px;
+  max-width: 240px;
   text-align: center;
+  padding: 24px 12px 18px 12px;
 }
-.quote {
-  font-size: 1.18em;
-  color: #4f8fff;
+.icon {
   margin-bottom: 12px;
-  font-style: italic;
 }
-.author {
+.home-testimonial {
+  text-align: center;
+  margin-top: 24px;
+}
+.home-testimonial .quote {
+  color: var(--el-color-primary);
+  font-size: 1.1em;
+  font-style: italic;
+  margin-bottom: 8px;
+}
+.home-testimonial .author {
   color: #888;
   font-size: 1em;
 }
-.footer {
-  margin: 64px 0 0 0;
-  padding: 24px 0 16px 0;
+.home-footer {
   text-align: center;
   color: #888;
   font-size: 1em;
-  max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-top: 32px;
 }
-.hero-bg-left {
-  position: absolute;
-  left: -120px;
-  top: -80px;
-  z-index: 0;
-}
-.hero-bg-right {
-  position: absolute;
-  right: -120px;
-  top: 40px;
-  z-index: 0;
-}
-.hero-content, .hero-illustration {
-  position: relative;
-  z-index: 1;
+@media (max-width: 900px) {
+  .home-hero-content {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .home-features {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .home-main-card {
+    padding: 16px 0;
+  }
 }
 </style> 

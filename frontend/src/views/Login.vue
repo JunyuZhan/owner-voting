@@ -1,29 +1,77 @@
 <template>
-  <div class="login-container">
-    <el-card>
-      <h2>用户登录</h2>
-      <el-form :model="form" :rules="rules" ref="loginForm" @submit.prevent="handleLogin">
-        <el-form-item label="用户名" prop="userName">
-          <el-input v-model="form.userName" autocomplete="username" />
+  <div class="login-page">
+    <AppCard class="login-card" :body-style="{padding: '40px 32px 32px 32px'}">
+      <div class="login-header">
+        <div class="login-logo">
+          <img src="https://dummyimage.com/48x48/4f8fff/fff.png&text=LOGO" alt="业主投票系统" />
+        </div>
+        <h1 class="login-title">业主投票系统</h1>
+        <p class="login-subtitle">社区共治，从业主参与开始</p>
+      </div>
+      <el-form :model="form" :rules="rules" ref="loginForm" @submit.prevent="handleLogin" class="login-form">
+        <el-form-item prop="userName">
+          <el-input 
+            v-model="form.userName" 
+            placeholder="用户名" 
+            prefix-icon="User"
+            autocomplete="username" 
+            size="large" 
+          />
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" type="password" autocomplete="current-password" />
+        <el-form-item prop="password">
+          <el-input 
+            v-model="form.password" 
+            type="password" 
+            placeholder="密码" 
+            prefix-icon="Lock"
+            autocomplete="current-password" 
+            size="large" 
+            show-password
+          />
         </el-form-item>
-        <el-form-item label="手机号" prop="mobile">
-          <el-input v-model="form.mobile" autocomplete="tel" />
+        <el-form-item prop="mobile">
+          <el-input 
+            v-model="form.mobile" 
+            placeholder="手机号" 
+            prefix-icon="Iphone"
+            autocomplete="tel" 
+            size="large" 
+          />
         </el-form-item>
-        <el-form-item label="验证码" prop="code">
-          <el-input v-model="form.code" style="width: 120px; margin-right: 8px;" />
-          <img :src="captchaUrl" @click="refreshCaptcha" style="height: 32px; cursor: pointer;" title="点击刷新验证码" />
+        <el-form-item prop="code" class="captcha-item">
+          <el-input 
+            v-model="form.code" 
+            placeholder="验证码" 
+            prefix-icon="Key"
+            size="large" 
+          />
+          <img 
+            :src="captchaUrl" 
+            @click="refreshCaptcha" 
+            class="captcha-image" 
+            title="点击刷新验证码" 
+          />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="loading" @click="handleLogin">登录</el-button>
+          <el-button 
+            type="primary" 
+            :loading="loading" 
+            @click="handleLogin"
+            class="submit-btn"
+            size="large"
+            round
+          >
+            登录
+          </el-button>
         </el-form-item>
       </el-form>
-      <div style="margin-top: 12px; text-align: right;">
-        <el-link type="primary" @click="goRegister">没有账号？去注册</el-link>
+      <div class="form-footer">
+        <el-link type="primary" @click="goRegister" class="register-link">没有账号？立即注册</el-link>
       </div>
-    </el-card>
+      <div class="login-tips">
+        <p><el-icon class="tips-icon"><InfoFilled /></el-icon> 初次使用需完成业主身份认证</p>
+      </div>
+    </AppCard>
   </div>
 </template>
 
@@ -31,6 +79,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { User, Lock, Iphone, Key, InfoFilled } from '@element-plus/icons-vue'
+import AppCard from '../components/AppCard.vue'
 
 const router = useRouter()
 const loginForm = ref(null)
@@ -91,8 +141,79 @@ const goRegister = () => {
 </script>
 
 <style scoped>
-.login-container {
-  max-width: 400px;
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f2f5;
+}
+.login-card {
+  width: 100%;
+  max-width: 420px;
   margin: 80px auto;
+}
+.login-header {
+  text-align: center;
+  margin-bottom: var(--app-spacing-xl);
+}
+.login-logo {
+  margin-bottom: var(--app-spacing-md);
+}
+.login-logo img {
+  width: 48px;
+  height: 48px;
+}
+.login-title {
+  font-size: var(--app-font-size-xxl);
+  color: var(--el-color-text-primary);
+  margin-bottom: var(--app-spacing-sm);
+}
+.login-subtitle {
+  font-size: var(--app-font-size-base);
+  color: var(--el-color-text-secondary);
+}
+.login-form {
+  margin-bottom: var(--app-spacing-md);
+}
+.captcha-item {
+  display: flex;
+  gap: var(--app-spacing-sm);
+}
+.captcha-image {
+  height: 40px;
+  border-radius: var(--app-border-radius-sm);
+  cursor: pointer;
+}
+.submit-btn {
+  width: 100%;
+  height: 44px;
+  font-size: var(--app-font-size-md);
+  font-weight: var(--app-font-weight-medium);
+}
+.form-footer {
+  text-align: right;
+  margin-bottom: var(--app-spacing-lg);
+}
+.register-link {
+  font-size: var(--app-font-size-base);
+  font-weight: var(--app-font-weight-medium);
+}
+.login-tips {
+  background-color: var(--el-color-primary-light-9);
+  padding: var(--app-spacing-md);
+  border-radius: var(--app-border-radius-sm);
+  font-size: var(--app-font-size-sm);
+  color: var(--el-color-text-secondary);
+}
+.tips-icon {
+  color: var(--el-color-primary);
+  margin-right: var(--app-spacing-xs);
+}
+@media screen and (max-width: 768px) {
+  .login-card {
+    padding: var(--app-spacing-md);
+    margin: 32px auto;
+  }
 }
 </style> 

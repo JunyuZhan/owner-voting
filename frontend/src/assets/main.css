@@ -1,10 +1,12 @@
 @import './base.css';
+@import '../styles/theme/variables.scss';
+@import '../styles/theme/common.scss';
 
 #app {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
   font-weight: normal;
+  min-height: 100vh;
 }
 
 a,

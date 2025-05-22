@@ -1,32 +1,31 @@
 <template>
-  <div class="register-container">
-    <el-card>
-      <h2>用户注册</h2>
-      <el-form :model="form" :rules="rules" ref="registerForm" @submit.prevent="handleRegister">
+  <div class="register-page">
+    <AppCard class="register-card" :body-style="{padding: '40px 32px 32px 32px'}" title="用户注册" subtitle="注册新账号，开启业主自治体验">
+      <el-form :model="form" :rules="rules" ref="registerForm" @submit.prevent="handleRegister" class="register-form">
         <el-form-item label="用户名" prop="userName">
-          <el-input v-model="form.userName" />
+          <el-input v-model="form.userName" size="large" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" type="password" />
+          <el-input v-model="form.password" type="password" size="large" show-password />
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="form.confirmPassword" type="password" />
+          <el-input v-model="form.confirmPassword" type="password" size="large" show-password />
         </el-form-item>
         <el-form-item label="手机号" prop="mobile">
-          <el-input v-model="form.mobile" />
+          <el-input v-model="form.mobile" size="large" />
         </el-form-item>
-        <el-form-item label="验证码" prop="code">
-          <el-input v-model="form.code" style="width: 120px; margin-right: 8px;" />
-          <img :src="captchaUrl" @click="refreshCaptcha" style="height: 32px; cursor: pointer;" title="点击刷新验证码" />
+        <el-form-item label="验证码" prop="code" class="captcha-item">
+          <el-input v-model="form.code" size="large" style="width: 120px; margin-right: 8px;" />
+          <img :src="captchaUrl" @click="refreshCaptcha" class="captcha-image" title="点击刷新验证码" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="loading" @click="handleRegister">注册</el-button>
+          <el-button type="primary" :loading="loading" @click="handleRegister" size="large" round>注册</el-button>
         </el-form-item>
       </el-form>
-      <div style="margin-top: 12px; text-align: right;">
+      <div class="form-footer">
         <el-link type="primary" @click="goLogin">已有账号？去登录</el-link>
       </div>
-    </el-card>
+    </AppCard>
   </div>
 </template>
 
@@ -34,6 +33,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import AppCard from '../components/AppCard.vue'
 
 const router = useRouter()
 const registerForm = ref(null)
@@ -102,8 +102,25 @@ const goLogin = () => {
 </script>
 
 <style scoped>
-.register-container {
-  max-width: 400px;
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f2f5;
+}
+.register-card {
+  width: 100%;
+  max-width: 420px;
   margin: 80px auto;
+}
+.captcha-image {
+  height: 40px;
+  border-radius: var(--app-border-radius-sm);
+  cursor: pointer;
+}
+.form-footer {
+  text-align: right;
+  margin-top: 12px;
 }
 </style> 

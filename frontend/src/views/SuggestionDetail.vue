@@ -1,16 +1,13 @@
 <template>
   <div class="suggestion-detail">
-    <el-card v-if="detail">
-      <h2>{{ detail.title }}</h2>
-      <div>状态：{{ detail.status }}</div>
-      <div>内容：{{ detail.content }}</div>
-      <div>点赞数：{{ detail.likeCount }}</div>
-      <el-button type="success" @click="handleLike">点赞</el-button>
+    <AppCard v-if="detail" :title="detail.title" :subtitle="`状态：${detail.status} | 点赞数：${detail.likeCount}`">
+      <div class="content mb-lg">{{ detail.content }}</div>
+      <el-button type="success" @click="handleLike" round class="mb-lg">点赞</el-button>
       <el-divider />
-      <h3>回复</h3>
+      <div class="section-title mb-sm">回复</div>
       <el-skeleton v-if="repliesLoading" rows="3" animated />
       <div v-else>
-        <div v-if="replies.length === 0">暂无回复</div>
+        <div v-if="replies.length === 0" class="empty-state"><el-empty description="暂无回复" /></div>
         <el-timeline v-else>
           <el-timeline-item v-for="item in replies" :key="item.id" :timestamp="item.createdAt">
             <div>{{ item.content }}</div>
@@ -24,10 +21,10 @@
           <el-input v-model="replyForm.content" type="textarea" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleReply" :loading="replyLoading">提交回复</el-button>
+          <el-button type="primary" @click="handleReply" :loading="replyLoading" round>提交回复</el-button>
         </el-form-item>
       </el-form>
-    </el-card>
+    </AppCard>
   </div>
 </template>
 
@@ -36,6 +33,7 @@ import { ref, onMounted } from 'vue'
 import { getSuggestionDetail, likeSuggestion, getSuggestionReplies, addSuggestionReply } from '../api/suggestion'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import AppCard from '../components/AppCard.vue'
 
 const route = useRoute()
 const detail = ref(null)
@@ -96,7 +94,15 @@ const handleReply = async () => {
 
 <style scoped>
 .suggestion-detail {
-  max-width: 600px;
+  max-width: 700px;
   margin: 40px auto;
 }
-</style> 
+.content {
+  color: var(--el-color-text-regular);
+  font-size: var(--app-font-size-md);
+  line-height: 1.8;
+}
+.empty-state {
+  padding: 32px 0;
+}
+</style>

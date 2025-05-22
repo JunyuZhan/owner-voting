@@ -1,0 +1,179 @@
+/* 全局通用样式 */
+
+@import './variables.scss';
+
+/* 基础样式重置 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--el-color-text-regular);
+  background: var(--app-body-background);
+  transition: color 0.5s, background-color 0.5s;
+  line-height: 1.6;
+  font-family: var(--app-font-family);
+  font-size: var(--app-font-size-base);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 全局布局类 */
+.page-container {
+  padding: var(--app-spacing-md);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card {
+  background-color: white;
+  border-radius: var(--app-border-radius-md);
+  box-shadow: var(--app-shadow-sm);
+  padding: var(--app-spacing-lg);
+  margin-bottom: var(--app-spacing-lg);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--app-spacing-md);
+  padding-bottom: var(--app-spacing-md);
+  border-bottom: 1px solid var(--el-color-border-lighter);
+}
+
+.card-title {
+  font-size: var(--app-font-size-lg);
+  font-weight: var(--app-font-weight-bold);
+  color: var(--el-color-text-primary);
+  margin: 0;
+}
+
+/* 通用标题样式 */
+.page-title {
+  font-size: var(--app-font-size-xxl);
+  font-weight: var(--app-font-weight-bold);
+  color: var(--el-color-text-primary);
+  margin-bottom: var(--app-spacing-lg);
+}
+
+.section-title {
+  font-size: var(--app-font-size-lg);
+  font-weight: var(--app-font-weight-medium);
+  margin-bottom: var(--app-spacing-md);
+  color: var(--el-color-text-primary);
+}
+
+/* 弹性布局工具类 */
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 间距工具类 */
+.mb-xs { margin-bottom: var(--app-spacing-xs); }
+.mb-sm { margin-bottom: var(--app-spacing-sm); }
+.mb-md { margin-bottom: var(--app-spacing-md); }
+.mb-lg { margin-bottom: var(--app-spacing-lg); }
+.mb-xl { margin-bottom: var(--app-spacing-xl); }
+
+.mt-xs { margin-top: var(--app-spacing-xs); }
+.mt-sm { margin-top: var(--app-spacing-sm); }
+.mt-md { margin-top: var(--app-spacing-md); }
+.mt-lg { margin-top: var(--app-spacing-lg); }
+.mt-xl { margin-top: var(--app-spacing-xl); }
+
+.mr-xs { margin-right: var(--app-spacing-xs); }
+.mr-sm { margin-right: var(--app-spacing-sm); }
+.mr-md { margin-right: var(--app-spacing-md); }
+.mr-lg { margin-right: var(--app-spacing-lg); }
+
+.ml-xs { margin-left: var(--app-spacing-xs); }
+.ml-sm { margin-left: var(--app-spacing-sm); }
+.ml-md { margin-left: var(--app-spacing-md); }
+.ml-lg { margin-left: var(--app-spacing-lg); }
+
+/* 响应式布局工具类 */
+@media (max-width: 768px) {
+  .hide-sm {
+    display: none !important;
+  }
+  
+  .card {
+    padding: var(--app-spacing-md);
+  }
+}
+
+/* 统一按钮样式修改 */
+.el-button {
+  border-radius: var(--app-border-radius-sm);
+}
+
+.el-button--primary {
+  --el-button-hover-bg-color: var(--el-color-primary-light-1);
+  --el-button-active-bg-color: var(--el-color-primary-dark-1);
+}
+
+.el-button--text {
+  padding: 0;
+}
+
+.el-button.is-round {
+  border-radius: var(--app-border-radius-pill);
+  padding-left: var(--app-spacing-lg);
+  padding-right: var(--app-spacing-lg);
+}
+
+/* 表格样式优化 */
+.el-table {
+  --el-table-header-bg-color: var(--el-color-primary-light-9);
+  --el-table-row-hover-bg-color: var(--el-color-primary-light-9);
+  border-radius: var(--app-border-radius-md);
+  overflow: hidden;
+}
+
+/* 卡片容器 */
+.el-card {
+  border-radius: var(--app-border-radius-md);
+  border: none;
+  box-shadow: var(--app-shadow-sm) !important;
+  margin-bottom: var(--app-spacing-md);
+}
+
+/* 表单样式 */
+.el-form-item__label {
+  font-weight: var(--app-font-weight-medium);
+}
+
+/* 页面过渡动画 */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+} 

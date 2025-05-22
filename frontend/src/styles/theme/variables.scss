@@ -1,0 +1,89 @@
+/* 业主投票系统主题变量 */
+
+/* 主色系 */
+:root {
+  /* 品牌色 */
+  --el-color-primary: #409eff;
+  --el-color-primary-light-1: #53a8ff;
+  --el-color-primary-light-2: #66b1ff;
+  --el-color-primary-light-3: #79bbff;
+  --el-color-primary-light-4: #8cc5ff;
+  --el-color-primary-light-5: #a0cfff;
+  --el-color-primary-light-6: #b3d8ff;
+  --el-color-primary-light-7: #c6e2ff;
+  --el-color-primary-light-8: #d9ecff;
+  --el-color-primary-light-9: #ecf5ff;
+  --el-color-primary-dark-1: #398FE5;
+
+  /* 功能色 */
+  --el-color-success: #67c23a;
+  --el-color-warning: #e6a23c;
+  --el-color-danger: #f56c6c;
+  --el-color-info: #909399;
+  
+  /* 中性色 */
+  --el-color-text-primary: #303133;
+  --el-color-text-regular: #606266;
+  --el-color-text-secondary: #909399;
+  --el-color-text-placeholder: #a8abb2;
+  --el-color-border: #dcdfe6;
+  --el-color-border-light: #e4e7ed;
+  --el-color-border-lighter: #ebeef5;
+  --el-color-border-extra-light: #f2f6fc;
+  --el-background-color: #f5f7fa;
+  
+  /* 自定义项目主题色 */
+  --app-color-secondary: #00c48c;
+  --app-color-accent: #ff647c;
+  --app-color-tertiary: #ffb300;
+  --app-color-gradient-start: #4f8fff;
+  --app-color-gradient-end: #00c48c;
+  --app-header-background: linear-gradient(90deg, var(--app-color-gradient-start) 0%, var(--app-color-gradient-end) 100%);
+  --app-body-background: #f8fafc;
+
+  /* 间距 */
+  --app-spacing-xs: 4px;
+  --app-spacing-sm: 8px;  
+  --app-spacing-md: 16px;
+  --app-spacing-lg: 24px;
+  --app-spacing-xl: 32px;
+  --app-spacing-xxl: 48px;
+
+  /* 圆角 */
+  --app-border-radius-sm: 4px;
+  --app-border-radius-md: 8px;
+  --app-border-radius-lg: 12px;
+  --app-border-radius-xl: 16px;
+  --app-border-radius-pill: 9999px;
+
+  /* 阴影 */
+  --app-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --app-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --app-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+  /* 字体 */
+  --app-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --app-font-size-xs: 12px;
+  --app-font-size-sm: 13px;
+  --app-font-size-base: 14px;
+  --app-font-size-md: 16px;
+  --app-font-size-lg: 18px;
+  --app-font-size-xl: 20px;
+  --app-font-size-xxl: 24px;
+  --app-font-weight-normal: 400;
+  --app-font-weight-medium: 500;
+  --app-font-weight-bold: 700;
+}
+
+/* 暗色主题 */
+html.dark {
+  --el-color-primary: #4f8fff;
+  --app-body-background: #141414;
+  --el-background-color: #1d1e1f;
+  --el-color-text-primary: #e5eaf3;
+  --el-color-text-regular: #cfd3dc;
+  --el-color-text-secondary: #a3a6ad;
+  --el-color-border: #4c4d4f;
+  --el-color-border-light: #414243;
+} 
