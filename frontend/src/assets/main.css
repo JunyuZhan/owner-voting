@@ -1,0 +1,67 @@
+@import './base.css';
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+  padding: 3px;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  body {
+    display: flex;
+    place-items: center;
+  }
+
+  #app {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  #app {
+    max-width: 100vw;
+    padding: 0.5rem;
+  }
+  .el-card {
+    padding: 8px !important;
+  }
+  .el-table {
+    font-size: 13px;
+  }
+  .global-header {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    padding: 8px 8px;
+    font-size: 16px;
+  }
+  .logo {
+    margin-bottom: 6px;
+  }
+  .user-info {
+    margin-bottom: 4px;
+  }
+  .el-button, .el-input {
+    font-size: 15px;
+  }
+  .el-table__body-wrapper {
+    overflow-x: auto;
+  }
+}

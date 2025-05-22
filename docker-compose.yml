@@ -1,0 +1,105 @@
+version: '3'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: owner-voting-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./frontend/dist:/usr/share/nginx/html
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - backend
+      
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: owner-voting-backend
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/owner_voting?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-root}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-root}
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minio}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minio123}
+      - OCR_SERVICE_URL=http://paddleocr:8866
+      - JWT_SECRET=${JWT_SECRET:-ownervotingsecretkey}
+      - JWT_EXPIRATION=86400
+    depends_on:
+      - mysql
+      - minio
+      - paddleocr
+    volumes:
+      - backend-logs:/app/logs
+      
+  mysql:
+    image: mysql:8.0
+    container_name: owner-voting-mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-root}
+      - MYSQL_DATABASE=owner_voting
+      - MYSQL_USER=${DB_USERNAME:-owner}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-owner123}
+      - TZ=Asia/Shanghai
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    
+  minio:
+    image: minio/minio
+    container_name: owner-voting-minio
+    restart: always
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minio}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minio123}
+    volumes:
+      - minio-data:/data
+    command: server /data
+    
+  paddleocr:
+    image: paddlepaddle/paddle:2.3.0
+    container_name: owner-voting-paddleocr
+    restart: always
+    volumes:
+      - ./paddleocr:/paddle/paddleocr
+      - paddleocr-data:/paddle/data
+    working_dir: /paddle
+    command: >
+      bash -c "
+        pip install paddleocr==2.6.0 -i https://mirror.baidu.com/pypi/simple &&
+        paddleocr --use_gpu=False --lang=ch --use_angle_cls=true --port=8866 --detmodel_dir=/paddle/data/det/ --recmodel_dir=/paddle/data/rec/ --clsmodel_dir=/paddle/data/cls/ server &
+        tail -f /dev/null
+      "
+  
+  # 初始化容器，用于设置MinIO bucket等初始配置
+  init:
+    image: minio/mc
+    container_name: owner-voting-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+        echo 'Waiting for minio to be ready...'
+        sleep 5
+        /usr/bin/mc config host add myminio http://minio:9000 ${MINIO_ACCESS_KEY:-minio} ${MINIO_SECRET_KEY:-minio123}
+        /usr/bin/mc mb myminio/owner-voting
+        /usr/bin/mc policy set download myminio/owner-voting/public
+        exit 0
+      "
+      
+volumes:
+  mysql-data:
+  minio-data:
+  paddleocr-data:
+  nginx-logs:
+  backend-logs: 

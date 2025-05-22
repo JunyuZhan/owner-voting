@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: owner-voting-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: owner_voting
+      MYSQL_USER: owner
+      MYSQL_PASSWORD: owner123
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    
+  minio:
+    image: minio/minio
+    container_name: owner-voting-minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    ports:
+      - "9000:9000"  # API端口
+      - "9001:9001"  # 控制台端口
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    
+  paddleocr:
+    image: paddlepaddle/paddle:2.3.0-gpu-cuda11.2-cudnn8
+    container_name: owner-voting-paddleocr
+    restart: always
+    ports:
+      - "8866:8866"
+    volumes:
+      - ./paddleocr:/paddle/paddleocr
+      - paddleocr-data:/paddle/data
+    working_dir: /paddle
+    command: >
+      bash -c "
+        pip install paddleocr==2.6.0 -i https://mirror.baidu.com/pypi/simple &&
+        paddleocr --use_gpu=False --lang=ch --use_angle_cls=true --port=8866 --detmodel_dir=/paddle/data/det/ --recmodel_dir=/paddle/data/rec/ --clsmodel_dir=/paddle/data/cls/ server &
+        tail -f /dev/null
+      "
+      
+volumes:
+  mysql-data:
+  minio-data:
+  paddleocr-data: 
