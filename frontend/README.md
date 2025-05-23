@@ -1,5 +1,17 @@
 # frontend
 
+本项目为基于 Vue 3 + Vite 的业主线上投票与自治系统前端。
+
+## 页面预览
+
+首页头部与主内容示意图：
+
+![Header](public/header.png)
+
+![Home](public/home.png)
+
+---
+
 This template should help get you started developing with Vue 3 in Vite.
 
 ## Recommended IDE Setup

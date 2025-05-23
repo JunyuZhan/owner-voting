@@ -23,6 +23,8 @@ a,
   }
 }
 
+/* 修复首页一半黑一半白的问题，注释掉大屏下的分栏布局 */
+/*
 @media (min-width: 1024px) {
   body {
     display: flex;
@@ -35,6 +37,7 @@ a,
     padding: 0 2rem;
   }
 }
+*/
 
 @media (max-width: 600px) {
   #app {
