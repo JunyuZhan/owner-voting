@@ -1,0 +1,17 @@
+# application-test.yml
+# 用于自动化测试环境，默认使用 H2 内存数据库
+# 如需集成测试真实数据库，请参考 application-mysql.yml 或 application-postgres.yml
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+# 说明：如需集成测试真实数据库，可参考 application-mysql.yml 或 application-postgres.yml 
