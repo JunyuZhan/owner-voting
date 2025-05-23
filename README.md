@@ -6,8 +6,8 @@
 ## 项目介绍
 
 业主线上投票与自治系统是一个专为中国小区业主设计的Web端投票平台，旨在依法合规地组织业主大会与投票，提高大型小区的投票效率与决策透明度，提供业主与业委会/物业的互动与监督通道。
-![Header](./public/header.png)
-![Home](./public/home.png)
+![Header](frontend/public/header.png)
+![Home](frontend/public/home.png)
 ### 核心功能
 
 - **实名认证**：支持房产证+身份证实名认证，确保投票人身份真实有效
