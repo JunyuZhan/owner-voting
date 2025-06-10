@@ -6,138 +6,416 @@
         <span>业主自治</span>
       </a>
       <ul class="nav-menu">
-        <li><a href="#">首页</a></li>
-        <li><a href="#">投票</a></li>
-        <li><a href="#">公告</a></li>
-        <li><a href="#">建议</a></li>
-        <li><a href="#">关于</a></li>
+        <li><a href="#communities">小区</a></li>
+        <li><a href="#votes">投票</a></li>
+        <li><a href="#announcements">公告</a></li>
+        <li><a href="#about">关于</a></li>
+        <li><a href="#" @click="goToApplication">申请管理</a></li>
       </ul>
+      <div class="nav-actions">
+        <button class="login-btn" @click="handleLogin">登录</button>
+      </div>
     </div>
   </nav>
+  
   <main class="main-content">
+    <!-- 首页横幅 -->
     <section class="hero-section">
       <div class="hero-content">
         <div class="hero-logo">🏠</div>
         <h1 class="hero-title">业主线上投票与自治系统</h1>
         <p class="hero-subtitle">让小区治理更高效、更透明、更有温度</p>
-        <a href="#" class="hero-button" @click="handleLogin">立即登录体验</a>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-number">{{ totalCommunities }}</div>
+            <div class="stat-label">接入小区</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">{{ totalVotes }}</div>
+            <div class="stat-label">累计投票</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">{{ totalOwners }}</div>
+            <div class="stat-label">注册业主</div>
+          </div>
+        </div>
+        <div class="hero-buttons">
+          <button class="hero-button primary" @click="handleLogin">立即登录参与</button>
+          <button class="hero-button secondary" @click="goToApplication">申请成为管理员</button>
+        </div>
       </div>
     </section>
-    <section class="features-section">
-      <div class="features-container">
-        <h2 class="features-title">为现代社区治理而生</h2>
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon vote">
-              <svg width="36" height="36" fill="none" viewBox="0 0 36 36">
-                <path d="M12 18l4 4 8-8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+
+    <!-- 小区列表 -->
+    <section id="communities" class="communities-section">
+      <div class="section-container">
+        <h2 class="section-title">已接入小区</h2>
+        <div class="communities-grid" v-loading="loadingCommunities">
+          <div v-for="community in communities" :key="community.id" class="community-card">
+            <div class="community-header">
+              <h3 class="community-name">{{ community.name }}</h3>
+              <span class="community-status">运行中</span>
             </div>
-            <h3 class="feature-title">实名投票</h3>
-            <p class="feature-description">业主实名参与，结果可追溯，杜绝刷票，确保每一票都真实有效</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon communication">
-              <svg width="36" height="36" fill="none" viewBox="0 0 36 36">
-                <path d="M8 12a4 4 0 014-4h12a4 4 0 014 4v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-8z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M16 16h4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-              </svg>
+            <p class="community-address">📍 {{ community.address }}</p>
+            <p class="community-description">{{ community.description }}</p>
+            <div class="community-stats">
+              <span class="stat">{{ community.voteCount || 0 }} 次投票</span>
+              <span class="stat">{{ community.announcementCount || 0 }} 个公告</span>
             </div>
-            <h3 class="feature-title">高效沟通</h3>
-            <p class="feature-description">公告、建议、投票一站式，信息触达每一位业主，沟通零障碍</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon security">
-              <svg width="36" height="36" fill="none" viewBox="0 0 36 36">
-                <path d="M18 8l-6 4v8a6 6 0 0012 0v-8l-6-4z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15 18l2 2 4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <h3 class="feature-title">数据安全</h3>
-            <p class="feature-description">多级权限、日志审计，保障数据隐私与安全，让您安心使用</p>
-          </div>
-          <div class="feature-card">
-            <div class="feature-icon analytics">
-              <svg width="36" height="36" fill="none" viewBox="0 0 36 36">
-                <rect x="8" y="20" width="4" height="8" rx="2" fill="currentColor"/>
-                <rect x="16" y="16" width="4" height="12" rx="2" fill="currentColor"/>
-                <rect x="24" y="12" width="4" height="16" rx="2" fill="currentColor"/>
-              </svg>
-            </div>
-            <h3 class="feature-title">智能统计</h3>
-            <p class="feature-description">投票、建议、业主等数据一目了然，智能分析辅助决策</p>
           </div>
         </div>
       </div>
     </section>
-    <section class="testimonial-section">
-      <div class="testimonial-container">
-        <div class="testimonial-quote">自从用了这个系统，业主参与度提升了，管理也更轻松了！</div>
-        <div class="testimonial-author">—— 某小区业委会主任</div>
+
+    <!-- 最新投票结果 -->
+    <section id="votes" class="votes-section">
+      <div class="section-container">
+        <h2 class="section-title">最新投票结果</h2>
+        <div class="votes-grid" v-loading="loadingVotes">
+          <div v-for="vote in publicVotes" :key="vote.id" class="vote-card">
+            <div class="vote-header">
+              <h3 class="vote-title">{{ vote.title }}</h3>
+              <span class="vote-status completed">已结束</span>
+            </div>
+            <p class="vote-community">{{ vote.communityName }}</p>
+            <p class="vote-description">{{ vote.description }}</p>
+            <div class="vote-result">
+              <div class="result-stats">
+                <span>参与率: {{ vote.participationRate }}%</span>
+                <span>总票数: {{ vote.totalVotes }}</span>
+              </div>
+              <div class="winning-option">
+                胜出选项: {{ vote.winningOption }}
+              </div>
+            </div>
+            <div class="vote-time">
+              结束时间: {{ formatDate(vote.endTime) }}
+            </div>
+          </div>
+        </div>
+        <div class="section-footer">
+          <button class="view-more-btn" @click="handleLogin">登录查看更多投票</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 公告信息 -->
+    <section id="announcements" class="announcements-section">
+      <div class="section-container">
+        <h2 class="section-title">公开公告</h2>
+        <div class="announcements-list" v-loading="loadingAnnouncements">
+          <div v-for="announcement in publicAnnouncements" :key="announcement.id" class="announcement-card">
+            <div class="announcement-header">
+              <h3 class="announcement-title">{{ announcement.title }}</h3>
+              <span class="announcement-type">{{ getAnnouncementTypeText(announcement.type) }}</span>
+            </div>
+            <p class="announcement-community">{{ announcement.communityName }}</p>
+            <p class="announcement-content">{{ announcement.content.substring(0, 200) }}...</p>
+            <div class="announcement-footer">
+              <span class="announcement-time">{{ formatDate(announcement.publishedAt) }}</span>
+              <button class="read-more-btn" @click="handleLogin">登录查看详情</button>
+            </div>
+          </div>
+        </div>
+        <div class="section-footer">
+          <button class="view-more-btn" @click="handleLogin">登录查看更多公告</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 广告位 -->
+    <section class="ad-section">
+      <div class="section-container">
+        <AdBanner 
+          :banner-ad="currentAd?.type === 'banner' ? currentAd : null"
+          :baidu-config="currentAd?.type === 'baidu' ? currentAd.config : null"
+          :show-ad="showAdvertisement && currentAd"
+        />
+      </div>
+    </section>
+
+    <!-- 系统特色 -->
+    <section class="features-section">
+      <div class="section-container">
+        <h2 class="section-title">为现代社区治理而生</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon vote">🗳️</div>
+            <h3 class="feature-title">透明投票</h3>
+            <p class="feature-description">实名认证，结果公开，每一票都可追溯</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon communication">📢</div>
+            <h3 class="feature-title">高效沟通</h3>
+            <p class="feature-description">公告、建议、投票一站式，信息及时触达</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon security">🔒</div>
+            <h3 class="feature-title">数据安全</h3>
+            <p class="feature-description">多级权限保护，确保个人隐私安全</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon analytics">📊</div>
+            <h3 class="feature-title">智能统计</h3>
+            <p class="feature-description">数据分析可视化，决策更科学</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 关于系统 -->
+    <section id="about" class="about-section">
+      <div class="section-container">
+        <h2 class="section-title">关于系统</h2>
+        <div class="about-content">
+          <p>业主投票与自治系统致力于为现代住宅小区提供数字化治理解决方案。通过在线投票、公告发布、意见收集等功能，促进业主参与社区事务，提升治理效率和透明度。</p>
+          <div class="about-features">
+            <div class="about-feature">
+              <strong>实名认证</strong> - 确保每位参与者身份真实
+            </div>
+            <div class="about-feature">
+              <strong>移动友好</strong> - 随时随地参与社区治理
+            </div>
+            <div class="about-feature">
+              <strong>数据安全</strong> - 严格保护用户隐私
+            </div>
+            <div class="about-feature">
+              <strong>结果公开</strong> - 投票结果实时公布
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
+  
   <footer class="footer">
-    © 2024 业主自治系统 · 让每一位业主都能参与社区治理
+    <div class="footer-content">
+      <div class="footer-section">
+        <h4>联系我们</h4>
+        <p>邮箱: support@community-voting.com</p>
+        <p>电话: 400-123-4567</p>
+      </div>
+      <div class="footer-section">
+        <h4>帮助中心</h4>
+        <p>使用指南</p>
+        <p>常见问题</p>
+      </div>
+      <div class="footer-section">
+        <h4>法律信息</h4>
+        <p>隐私政策</p>
+        <p>使用条款</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2024 业主自治系统 · 让每一位业主都能参与社区治理
+    </div>
   </footer>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import AdBanner from '@/components/AdBanner.vue'
 
 const router = useRouter()
 
-function handleLogin() {
+// 响应式数据
+const communities = ref([])
+const publicVotes = ref([])
+const publicAnnouncements = ref([])
+const totalCommunities = ref(0)
+const totalVotes = ref(0)
+const totalOwners = ref(0)
+const loadingCommunities = ref(false)
+const loadingVotes = ref(false)
+const loadingAnnouncements = ref(false)
+
+// 广告相关
+const showAdvertisement = ref(true)
+const currentAd = ref(null)
+
+// 获取公开数据
+const fetchPublicData = async () => {
+  try {
+    // 获取小区列表
+    loadingCommunities.value = true
+    const communitiesRes = await fetch('/api/community/public')
+    if (communitiesRes.ok) {
+      const communitiesData = await communitiesRes.json()
+      if (communitiesData.code === 200) {
+        communities.value = communitiesData.data.slice(0, 6) // 显示前6个
+        totalCommunities.value = communitiesData.data.length
+      }
+    }
+  } catch (error) {
+    console.error('获取小区数据失败:', error)
+    // 使用模拟数据
+    communities.value = [
+      {
+        id: 1,
+        name: '示范小区',
+        address: '北京市海淀区中关村大街1号',
+        description: '这是一个示范小区，用于系统演示',
+        voteCount: 15,
+        announcementCount: 8
+      },
+      {
+        id: 2,
+        name: '阳光花园',
+        address: '北京市朝阳区建国路88号',
+        description: '阳光花园是一个现代化住宅小区',
+        voteCount: 12,
+        announcementCount: 5
+      }
+    ]
+    totalCommunities.value = 2
+  } finally {
+    loadingCommunities.value = false
+  }
+
+  try {
+    // 获取公开投票结果
+    loadingVotes.value = true
+    const votesRes = await fetch('/api/vote-topic/public')
+    if (votesRes.ok) {
+      const votesData = await votesRes.json()
+      if (votesData.code === 200) {
+        publicVotes.value = votesData.data.slice(0, 4)
+        totalVotes.value = votesData.total || votesData.data.length
+      }
+    }
+  } catch (error) {
+    console.error('获取投票数据失败:', error)
+    // 使用模拟数据
+    publicVotes.value = [
+      {
+        id: 1,
+        title: '小区停车位分配方案投票',
+        communityName: '示范小区',
+        description: '针对小区停车位紧张问题，提出三种分配方案供业主选择',
+        participationRate: 78,
+        totalVotes: 156,
+        winningOption: '按楼栋分配固定车位',
+        endTime: '2024-01-15T18:00:00'
+      },
+      {
+        id: 2,
+        title: '物业费调整投票',
+        communityName: '阳光花园',
+        description: '考虑到物价上涨和服务升级，物业费需要适当调整',
+        participationRate: 85,
+        totalVotes: 210,
+        winningOption: '上调10%，加强安保服务',
+        endTime: '2024-01-10T20:00:00'
+      }
+    ]
+    totalVotes.value = 27
+  } finally {
+    loadingVotes.value = false
+  }
+
+  try {
+    // 获取公开公告
+    loadingAnnouncements.value = true
+    const announcementsRes = await fetch('/api/announcement/public')
+    if (announcementsRes.ok) {
+      const announcementsData = await announcementsRes.json()
+      if (announcementsData.code === 200) {
+        publicAnnouncements.value = announcementsData.data.slice(0, 5)
+      }
+    }
+  } catch (error) {
+    console.error('获取公告数据失败:', error)
+    // 使用模拟数据
+    publicAnnouncements.value = [
+      {
+        id: 1,
+        title: '春节期间物业服务安排通知',
+        type: 'NOTICE',
+        communityName: '示范小区',
+        content: '尊敬的业主，春节期间（2月9日-2月17日）物业服务安排如下：1. 保安24小时值班；2. 保洁每日上午清理；3. 维修服务电话保持畅通...',
+        publishedAt: '2024-02-01T10:00:00'
+      },
+      {
+        id: 2,
+        title: '小区绿化改造完工公告',
+        type: 'NOTICE',
+        communityName: '阳光花园',
+        content: '经过一个月的施工，小区绿化改造工程已全面完工。新增绿植覆盖面积200平方米，安装了自动喷灌系统，预计春季将呈现更加美丽的景色...',
+        publishedAt: '2024-01-28T14:30:00'
+      }
+    ]
+  } finally {
+    loadingAnnouncements.value = false
+  }
+
+  // 设置模拟统计数据
+  totalOwners.value = 1247
+
+  // 获取广告数据
+  try {
+    const adRes = await fetch('/api/ad/current')
+    if (adRes.ok) {
+      const adData = await adRes.json()
+      if (adData.code === 200 && adData.data) {
+        currentAd.value = adData.data
+      }
+    }
+  } catch (error) {
+    console.error('获取广告数据失败:', error)
+    // 使用默认广告
+    currentAd.value = {
+      id: 0,
+      title: '物业管理系统专业版',
+      image: 'https://via.placeholder.com/300x100?text=物业管理系统',
+      link: 'https://example.com'
+    }
+  }
+}
+
+// 工具函数
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('zh-CN')
+}
+
+const getAnnouncementTypeText = (type) => {
+  const types = {
+    'NOTICE': '通知',
+    'FINANCIAL': '财务',
+    'VOTE_RESULT': '投票结果',
+    'OTHER': '其他'
+  }
+  return types[type] || '通知'
+}
+
+const handleLogin = () => {
   router.push('/login')
 }
 
+const goToApplication = () => {
+  router.push('/community-admin-application')
+}
+
 onMounted(() => {
-  // 平滑滚动和动画效果
-  const featureCards = document.querySelectorAll('.feature-card');
-  const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  };
-  const observer = new window.IntersectionObserver(function(entries) {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
+  fetchPublicData()
+  
+  // 平滑滚动
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault()
+      const target = document.querySelector(this.getAttribute('href'))
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth'
+        })
       }
-    });
-  }, observerOptions);
-  featureCards.forEach(card => {
-    observer.observe(card);
-  });
-
-  // 导航栏滚动效果
-  let lastScrollTop = 0;
-  const navbar = document.querySelector('.navbar');
-  window.addEventListener('scroll', function() {
-    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    if (scrollTop > 100) {
-      navbar.style.background = 'rgba(255, 255, 255, 0.9)';
-    } else {
-      navbar.style.background = 'rgba(255, 255, 255, 0.72)';
-    }
-    lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-  });
-
-  // 特性卡片悬停效果
-  featureCards.forEach(card => {
-    card.addEventListener('mouseenter', function() {
-      this.style.transform = 'translateY(-8px) scale(1.02)';
-    });
-    card.addEventListener('mouseleave', function() {
-      this.style.transform = 'translateY(0) scale(1)';
-    });
-  });
-});
+    })
+  })
+})
 </script>
 
 <style scoped>
-/* 复制原有 <style> 内容，去除 body、html 标签样式 */
 * {
   margin: 0;
   padding: 0;
@@ -145,16 +423,16 @@ onMounted(() => {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Icons', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
   line-height: 1.6;
   color: #1d1d1f;
   background: #ffffff;
-  overflow-x: hidden;
 }
 
+/* 导航栏样式 */
 .navbar {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
   position: fixed;
   top: 0;
   width: 100%;
@@ -169,7 +447,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 52px;
+  height: 60px;
 }
 
 .nav-logo {
@@ -183,8 +461,8 @@ body {
 }
 
 .logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
   background: linear-gradient(135deg, #007aff, #5856d6);
   display: flex;
@@ -192,7 +470,6 @@ body {
   justify-content: center;
   color: white;
   font-weight: 700;
-  font-size: 16px;
 }
 
 .nav-menu {
@@ -204,374 +481,520 @@ body {
 .nav-menu a {
   color: #1d1d1f;
   text-decoration: none;
-  font-size: 17px;
-  font-weight: 400;
-  transition: color 0.3s ease;
+  font-weight: 500;
+  transition: color 0.2s;
 }
 
 .nav-menu a:hover {
   color: #007aff;
 }
 
-.main-content {
-  margin-top: 52px;
+.login-btn {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
+.login-btn:hover {
+  background: #0056b3;
+}
+
+/* 主要内容区域 */
+.main-content {
+  margin-top: 60px;
+}
+
+/* 首页横幅 */
 .hero-section {
-  background: linear-gradient(135deg, #007aff 0%, #5856d6 50%, #af52de 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 120px 24px 160px;
-  position: relative;
-  overflow: hidden;
+  padding: 80px 24px;
   text-align: center;
 }
 
-.hero-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
 .hero-logo {
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 32px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 48px;
-  font-weight: 700;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 64px;
+  margin-bottom: 24px;
 }
 
 .hero-title {
-  font-size: 64px;
+  font-size: 48px;
   font-weight: 700;
-  line-height: 1.1;
-  margin-bottom: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  margin-bottom: 16px;
 }
 
 .hero-subtitle {
-  font-size: 28px;
-  font-weight: 400;
-  margin-bottom: 48px;
+  font-size: 20px;
+  margin-bottom: 40px;
   opacity: 0.9;
-  line-height: 1.3;
+}
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  margin-bottom: 40px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
 
 .hero-button {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  background: white;
+  color: #667eea;
+  border: none;
   padding: 16px 32px;
-  border-radius: 980px;
-  font-size: 19px;
+  border-radius: 30px;
+  font-size: 18px;
   font-weight: 600;
-  text-decoration: none;
-  display: inline-block;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.hero-button:hover::before {
-  left: 100%;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
 .hero-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-  background: rgba(255, 255, 255, 0.25);
 }
 
-.features-section {
-  padding: 120px 24px;
-  background: #f5f5f7;
-  position: relative;
+.hero-button.primary {
+  background: white;
+  color: #667eea;
 }
 
-.features-container {
+.hero-button.secondary {
+  background: white;
+  color: #667eea;
+}
+
+/* 通用段落样式 */
+.section-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 24px;
 }
 
-.features-title {
-  text-align: center;
-  font-size: 48px;
+.section-title {
+  font-size: 32px;
   font-weight: 700;
+  text-align: center;
+  margin-bottom: 48px;
   color: #1d1d1f;
-  margin-bottom: 80px;
-  line-height: 1.1;
+}
+
+.section-footer {
+  text-align: center;
+  margin-top: 40px;
+}
+
+.view-more-btn {
+  background: #f5f5f7;
+  color: #1d1d1f;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.view-more-btn:hover {
+  background: #e5e5e7;
+}
+
+/* 小区列表样式 */
+.communities-section {
+  padding: 80px 0;
+  background: #f5f5f7;
+}
+
+.communities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.community-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.community-card:hover {
+  transform: translateY(-4px);
+}
+
+.community-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.community-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.community-status {
+  background: #34c759;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.community-address {
+  color: #86868b;
+  margin-bottom: 12px;
+}
+
+.community-description {
+  color: #1d1d1f;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.community-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.stat {
+  background: #f5f5f7;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #86868b;
+}
+
+/* 投票结果样式 */
+.votes-section {
+  padding: 80px 0;
+}
+
+.votes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+.vote-card {
+  background: white;
+  border: 1px solid #e5e5e7;
+  border-radius: 16px;
+  padding: 24px;
+  transition: box-shadow 0.2s;
+}
+
+.vote-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.vote-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.vote-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
+  flex: 1;
+}
+
+.vote-status.completed {
+  background: #86868b;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.vote-community {
+  color: #007aff;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.vote-description {
+  color: #86868b;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.vote-result {
+  background: #f5f5f7;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.result-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #86868b;
+}
+
+.winning-option {
+  font-weight: 600;
+  color: #34c759;
+}
+
+.vote-time {
+  font-size: 14px;
+  color: #86868b;
+}
+
+/* 公告样式 */
+.announcements-section {
+  padding: 80px 0;
+  background: #f5f5f7;
+}
+
+.announcements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.announcement-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.announcement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.announcement-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.announcement-type {
+  background: #007aff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.announcement-community {
+  color: #007aff;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.announcement-content {
+  color: #86868b;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.announcement-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.announcement-time {
+  font-size: 14px;
+  color: #86868b;
+}
+
+.read-more-btn {
+  background: #007aff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* 特色功能样式 */
+.features-section {
+  padding: 80px 0;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin-bottom: 120px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 32px;
 }
 
 .feature-card {
-  background: white;
-  border-radius: 24px;
-  padding: 48px 32px;
   text-align: center;
-  position: relative;
-  transition: all 0.4s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-
-.feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 32px 20px;
 }
 
 .feature-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 32px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  color: white;
-  position: relative;
-  transition: transform 0.3s ease;
-}
-
-.feature-card:hover .feature-icon {
-  transform: scale(1.1);
-}
-
-.feature-icon.vote {
-  background: linear-gradient(135deg, #007aff, #5ac8fa);
-}
-
-.feature-icon.communication {
-  background: linear-gradient(135deg, #ff9500, #ffcc00);
-}
-
-.feature-icon.security {
-  background: linear-gradient(135deg, #34c759, #30d158);
-}
-
-.feature-icon.analytics {
-  background: linear-gradient(135deg, #ff3b30, #ff6961);
+  font-size: 48px;
+  margin-bottom: 20px;
 }
 
 .feature-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
+  margin-bottom: 12px;
   color: #1d1d1f;
-  margin-bottom: 16px;
 }
 
 .feature-description {
-  font-size: 17px;
   color: #86868b;
   line-height: 1.5;
 }
 
-.testimonial-section {
-  background: white;
-  padding: 80px 24px;
-  text-align: center;
-  position: relative;
+/* 关于系统样式 */
+.about-section {
+  padding: 80px 0;
+  background: #f5f5f7;
 }
 
-.testimonial-container {
+.about-content {
   max-width: 800px;
   margin: 0 auto;
+  text-align: center;
 }
 
-.testimonial-quote {
-  font-size: 32px;
-  font-weight: 600;
-  color: #1d1d1f;
-  line-height: 1.3;
+.about-content p {
+  font-size: 18px;
+  line-height: 1.6;
   margin-bottom: 32px;
-  position: relative;
+  color: #1d1d1f;
 }
 
-.testimonial-quote::before {
-  content: '"';
-  color: #007aff;
-  font-size: 64px;
-  position: absolute;
-  left: -32px;
-  top: -16px;
-  opacity: 0.3;
+.about-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
 }
 
-.testimonial-author {
-  font-size: 17px;
-  color: #86868b;
-  font-weight: 400;
+.about-feature {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  font-size: 16px;
 }
 
+/* 页脚样式 */
 .footer {
   background: #1d1d1f;
   color: #86868b;
-  text-align: center;
-  padding: 48px 24px;
-  font-size: 17px;
+  padding: 60px 0 20px;
 }
 
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-section h4 {
+  color: white;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+
+.footer-section p {
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.footer-section p:hover {
+  color: #007aff;
+}
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 24px 0;
+  border-top: 1px solid #333;
+  text-align: center;
+}
+
+/* 广告区域样式 */
+.ad-section {
+  padding: 40px 0;
+  background: #ffffff;
+}
+
+/* 响应式设计 */
 @media (max-width: 768px) {
   .nav-menu {
     display: none;
   }
+  
   .hero-title {
     font-size: 32px;
-    word-break: break-all;
   }
+  
   .hero-subtitle {
-    font-size: 16px;
-    margin-bottom: 32px;
+    font-size: 18px;
   }
-  .hero-section {
-    padding: 40px 8px 60px;
+  
+  .hero-stats {
+    flex-direction: column;
+    gap: 20px;
   }
-  .features-title {
-    font-size: 22px;
-    margin-bottom: 32px;
-  }
-  .features-section {
-    padding: 32px 8px;
-  }
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 32px;
-  }
-  .feature-card {
-    padding: 16px 8px;
-    border-radius: 14px;
-  }
-  .feature-icon {
-    width: 48px;
-    height: 48px;
-    font-size: 22px;
-    margin-bottom: 16px;
-    border-radius: 12px;
-  }
-  .feature-title {
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-  .feature-description {
-    font-size: 13px;
-  }
-  .testimonial-quote {
-    font-size: 16px;
-    margin-bottom: 16px;
-  }
-  .testimonial-quote::before {
-    font-size: 28px;
-    left: -12px;
-    top: -6px;
-  }
-  .testimonial-section {
-    padding: 32px 8px;
-  }
-  .testimonial-author {
-    font-size: 13px;
-  }
-  .footer {
-    padding: 16px 8px;
-    font-size: 13px;
-  }
-  .hero-logo {
-    width: 48px;
-    height: 48px;
+  
+  .section-title {
     font-size: 24px;
-    margin-bottom: 16px;
-    border-radius: 12px;
   }
-  .hero-button {
-    padding: 10px 18px;
-    font-size: 15px;
+  
+  .communities-grid,
+  .votes-grid {
+    grid-template-columns: 1fr;
   }
-}
-
-@media (max-width: 600px) {
-  .main-content {
-    margin-top: 44px;
+  
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
-  .nav-container {
-    padding: 0 8px;
-    height: 44px;
-  }
-  .navbar {
-    height: 44px;
+  
+  .about-features {
+    grid-template-columns: 1fr;
   }
 }
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.hero-content > * {
-  animation: fadeInUp 0.8s ease-out;
-}
-
-.hero-subtitle {
-  animation-delay: 0.2s;
-}
-
-.hero-button {
-  animation-delay: 0.4s;
-}
-
-.feature-card {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.6s ease-out forwards;
-}
-
-.feature-card:nth-child(1) { animation-delay: 0.1s; }
-.feature-card:nth-child(2) { animation-delay: 0.2s; }
-.feature-card:nth-child(3) { animation-delay: 0.3s; }
-.feature-card:nth-child(4) { animation-delay: 0.4s; }
 </style>

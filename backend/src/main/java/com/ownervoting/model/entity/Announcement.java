@@ -27,6 +27,8 @@ public class Announcement {
     private Type type; // NOTICE, VOTE_RESULT, FINANCIAL, OTHER
 
     private Boolean isPinned = false;
+    
+    @Column(name = "publish_time")
     private LocalDateTime publishedAt;
 
     @Column(length = 50)

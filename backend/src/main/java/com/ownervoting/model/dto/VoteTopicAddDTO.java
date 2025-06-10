@@ -4,6 +4,7 @@ import lombok.Data;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class VoteTopicAddDTO {
@@ -21,4 +22,13 @@ public class VoteTopicAddDTO {
     private Boolean isResultPublic = true;
     private String status;
     private Long createdBy;
+    
+    // 投票选项
+    private List<VoteOptionDTO> options;
+    
+    @Data
+    public static class VoteOptionDTO {
+        private String optionText;
+        private Integer sortOrder;
+    }
 } 

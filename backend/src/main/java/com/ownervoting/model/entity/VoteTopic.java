@@ -3,6 +3,7 @@ package com.ownervoting.model.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -47,4 +48,15 @@ public class VoteTopic {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
-} 
+
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<VoteOption> options;
+
+    public List<VoteOption> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<VoteOption> options) {
+        this.options = options;
+    }
+}

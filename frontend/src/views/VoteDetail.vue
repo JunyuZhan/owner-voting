@@ -3,7 +3,7 @@
     <el-divider />
     <div v-if="!voted" class="vote-section">
       <el-radio-group v-model="selectedOption">
-        <el-radio v-for="opt in detail.options" :key="opt.id" :label="opt.id">{{ opt.text }}</el-radio>
+        <el-radio v-for="opt in detail.options" :key="opt.id" :value="opt.id">{{ opt.text }}</el-radio>
       </el-radio-group>
       <el-button type="primary" @click="submitVote" :disabled="!selectedOption" class="mt-md" round>提交投票</el-button>
     </div>
@@ -59,4 +59,4 @@ onMounted(fetchDetail)
 .vote-section {
   margin-bottom: var(--app-spacing-lg);
 }
-</style> 
+</style>

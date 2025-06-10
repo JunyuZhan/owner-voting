@@ -35,7 +35,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getSuggestions, deleteSuggestion, adminReplySuggestion } from '../../api/suggestion'
+import { getSuggestionList, deleteSuggestion, adminReplySuggestion } from '../../api/suggestion'
 import { ElMessage, ElMessageBox } from 'element-plus'
 const list = ref([])
 const loading = ref(false)
@@ -47,8 +47,13 @@ const currentId = ref(null)
 const fetchList = async () => {
   loading.value = true
   try {
-    const res = await getSuggestions()
-    list.value = res.list || res.data?.list || []
+    const res = await getSuggestionList()
+    console.log('获取建议列表响应:', res)
+    list.value = res.data || res.list || []
+    console.log('处理后的建议列表:', list.value)
+  } catch (error) {
+    console.error('获取建议列表失败:', error)
+    ElMessage.error('获取建议列表失败')
   } finally {
     loading.value = false
   }

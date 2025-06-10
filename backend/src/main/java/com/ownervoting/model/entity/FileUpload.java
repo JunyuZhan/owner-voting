@@ -35,7 +35,7 @@ public class FileUpload {
     private Long fileSize;
 
     @Column(length = 50)
-    private String fileType;
+    private String contentType;
 
     @PrePersist
     public void prePersist() {
@@ -50,6 +50,33 @@ public class FileUpload {
         return owner != null ? owner.getId() : null;
     }
 
+    public void setOwnerId(Long ownerId) {
+        // 这里需要根据ownerId设置owner对象，但为了简化，我们先创建一个临时的Owner对象
+        if (ownerId != null) {
+            Owner tempOwner = new Owner();
+            tempOwner.setId(ownerId);
+            this.owner = tempOwner;
+        } else {
+            this.owner = null;
+        }
+    }
+
+    public String getFileName() {
+        return originalName;
+    }
+
+    public void setFileName(String fileName) {
+        this.originalName = fileName;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
     public Long getFileSize() {
         return fileSize;
     }
@@ -58,11 +85,11 @@ public class FileUpload {
         this.fileSize = fileSize;
     }
 
-    public String getFileType() {
-        return fileType;
+    public String getFileTypeString() {
+        return contentType;
     }
 
-    public void setFileType(String fileType) {
-        this.fileType = fileType;
+    public void setFileTypeString(String fileType) {
+        this.contentType = fileType;
     }
 }

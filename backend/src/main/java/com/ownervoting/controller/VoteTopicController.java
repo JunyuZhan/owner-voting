@@ -99,6 +99,38 @@ public class VoteTopicController {
         return ApiResponse.success(voteResultService.getVoteResult(id));
     }
 
+    /**
+     * 获取实时投票进度（用于投票过程中的实时显示）
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/votes/{id}/progress")
+    public ApiResponse<Map<String, Object>> getRealTimeProgress(@PathVariable Long id) {
+        Map<String, Object> progress = voteResultService.getRealTimeProgress(id);
+        return ApiResponse.success(progress);
+    }
+    
+    /**
+     * 获取投票参与率统计
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/votes/{id}/participation")
+    public ApiResponse<Map<String, Object>> getParticipationStats(@PathVariable Long id) {
+        Map<String, Object> stats = voteResultService.getParticipationStats(id);
+        return ApiResponse.success(stats);
+    }
+    
+    /**
+     * 检查决议有效性
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/votes/{id}/validity")
+    public ApiResponse<Map<String, Object>> checkDecisionValidity(
+            @PathVariable Long id, 
+            @RequestParam(defaultValue = "0.5") BigDecimal threshold) {
+        Map<String, Object> validity = voteResultService.checkDecisionValidity(id, threshold);
+        return ApiResponse.success(validity);
+    }
+
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/page")
     public ApiResponse<Map<String, Object>> getPage(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
@@ -107,6 +139,49 @@ public class VoteTopicController {
         result.put("total", paged.getTotalElements());
         result.put("list", paged.getContent().stream().map(this::toVO).toList());
         return ApiResponse.success(result);
+    }
+
+    /**
+     * 获取公开投票话题（无需登录）
+     */
+    @GetMapping("/public")
+    public ApiResponse<List<VoteTopicVO>> getPublicVoteTopics() {
+        try {
+            // 只返回激活状态的投票话题，限制数量
+            List<VoteTopic> topics = voteTopicService.findActiveTopics();
+            List<VoteTopicVO> voList = topics.stream()
+                .map(this::toVO)
+                .limit(10) // 最多显示10条
+                .toList();
+            return ApiResponse.success(voList);
+        } catch (Exception e) {
+            return ApiResponse.error(500, "获取公开投票话题失败");
+        }
+    }
+
+    /**
+     * 更新投票话题
+     */
+    @PreAuthorize("hasAnyRole('SYSTEM_ADMIN','COMMUNITY_ADMIN','OPERATOR')")
+    @PutMapping("/update/{id}")
+    public ApiResponse<VoteTopicVO> updateVoteTopic(@PathVariable Long id, @Valid @RequestBody VoteTopicAddDTO dto) {
+        VoteTopic existing = voteTopicService.findById(id);
+        if (existing == null) {
+            return ApiResponse.error(404, "投票话题不存在");
+        }
+        
+        existing.setTitle(dto.getTitle());
+        existing.setDescription(dto.getDescription());
+        existing.setStartTime(dto.getStartTime());
+        existing.setEndTime(dto.getEndTime());
+        existing.setIsAreaWeighted(dto.getIsAreaWeighted());
+        existing.setIsRealName(dto.getIsRealName());
+        existing.setIsResultPublic(dto.getIsResultPublic());
+        existing.setStatus(dto.getStatus());
+        
+        VoteTopic saved = voteTopicService.updateTopic(existing);
+        VoteTopicVO vo = toVO(saved);
+        return ApiResponse.success(vo);
     }
 
     private VoteTopicVO toVO(VoteTopic topic) {

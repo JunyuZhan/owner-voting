@@ -4,6 +4,16 @@ export function getSuggestions(params) {
   return request.get('/suggestion/page', { params })
 }
 
+// 添加别名导出，兼容不同的调用方式
+export function getSuggestionList(params) {
+  return request.get('/suggestion/page', { params })
+}
+
+// 添加获取我的建议列表的函数
+export function getMySuggestionList(ownerId) {
+  return request.get(`/suggestion/by-owner/${ownerId}`)
+}
+
 export function getSuggestionDetail(id) {
   return request.get(`/suggestion/${id}`)
 }

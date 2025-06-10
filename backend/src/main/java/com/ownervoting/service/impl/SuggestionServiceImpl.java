@@ -44,18 +44,22 @@ public class SuggestionServiceImpl implements SuggestionService {
 
     @Override
     public Suggestion findById(Long id) {
+        if (id == null) {
+            return null;
+        }
         return suggestionRepository.findById(id).orElse(null);
     }
 
     @Override
     public List<Suggestion> findByOwnerId(Long ownerId) {
-        return suggestionRepository.findAll().stream()
-                .filter(s -> s.getOwner() != null && s.getOwner().getId().equals(ownerId))
-                .toList();
+        if (ownerId == null) {
+            return List.of();
+        }
+        return suggestionRepository.findByOwnerId(ownerId);
     }
 
     @Override
     public Page<Suggestion> findPage(Pageable pageable) {
         return suggestionRepository.findAll(pageable);
     }
-} 
+}

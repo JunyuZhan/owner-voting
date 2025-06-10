@@ -115,7 +115,7 @@ public class FileUploadController {
         upload.setOriginalName(originalFilename);
         upload.setStoragePath(filePath.toString());
         upload.setFileSize(file.getSize());
-        upload.setFileType(file.getContentType());
+        upload.setContentType(file.getContentType());
         
         // 保存记录
         fileUploadService.addFile(upload);

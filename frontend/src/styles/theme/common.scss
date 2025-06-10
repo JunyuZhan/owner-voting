@@ -1,6 +1,6 @@
 /* 全局通用样式 */
 
-@import './variables.scss';
+@use './variables.scss' as *;
 
 /* 基础样式重置 */
 *,

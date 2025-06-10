@@ -34,8 +34,6 @@ public class VoteOptionServiceImpl implements VoteOptionService {
 
     @Override
     public List<VoteOption> findByTopicId(Long topicId) {
-        return voteOptionRepository.findAll().stream()
-                .filter(o -> (o.getVoteTopic() != null && o.getVoteTopic().getId().equals(topicId)) || (o.getTopic() != null && o.getTopic().getId().equals(topicId)))
-                .toList();
+        return voteOptionRepository.findByTopicId(topicId);
     }
-} 
+}

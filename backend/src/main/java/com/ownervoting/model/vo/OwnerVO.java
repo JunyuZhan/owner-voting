@@ -1,6 +1,7 @@
 package com.ownervoting.model.vo;
 
 import lombok.Data;
+import java.time.LocalDateTime;
 
 @Data
 public class OwnerVO {
@@ -9,4 +10,6 @@ public class OwnerVO {
     private String name;
     private Boolean isVerified;
     private String status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 } 

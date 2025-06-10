@@ -18,9 +18,18 @@ public class VoteOption {
     @Column(length = 255)
     private String optionText;
 
+    @Column(name = "order_num")
     private Integer sortOrder = 0;
 
     public VoteTopic getVoteTopic() {
         return topic;
     }
-} 
+
+    public String getText() {
+        return optionText;
+    }
+
+    public void setText(String text) {
+        this.optionText = text;
+    }
+}

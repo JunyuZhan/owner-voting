@@ -45,7 +45,7 @@ public class VoteRecordServiceImpl implements VoteRecordService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.SERIALIZABLE) // 使用最高隔离级别确保数据一致性
+    @Transactional(isolation = Isolation.READ_COMMITTED) // 使用合适的隔离级别，避免性能问题
     public VoteRecord addVoteRecord(VoteRecord record) {
         Long topicId = record.getTopic().getId();
         Long voterId = record.getVoter().getId();
@@ -120,4 +120,4 @@ public class VoteRecordServiceImpl implements VoteRecordService {
     public Page<VoteRecord> findPage(Pageable pageable) {
         return voteRecordRepository.findAll(pageable);
     }
-} 
+}

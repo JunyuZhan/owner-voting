@@ -70,13 +70,14 @@ const handleRegister = async () => {
   await registerForm.value.validate()
   loading.value = true
   try {
-    const res = await fetch('/api/v1/user/add', {
+    const res = await fetch('/api/owner/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        userName: form.value.userName,
+        name: form.value.userName,
         password: form.value.password,
-        mobile: form.value.mobile
+        phone: form.value.mobile,
+        idCard: '' // 身份证号暂时为空，后续在业主认证时填写
       })
     })
     const data = await res.json()

@@ -10,8 +10,8 @@
       </div>
       <div class="login-switch">
         <el-radio-group v-model="loginType" size="small">
-          <el-radio-button label="owner">业主登录</el-radio-button>
-          <el-radio-button label="admin">管理员登录</el-radio-button>
+          <el-radio-button value="owner">业主登录</el-radio-button>
+          <el-radio-button value="admin">管理员登录</el-radio-button>
         </el-radio-group>
       </div>
       <el-form :model="form" :rules="rules" ref="loginForm" @submit.prevent="handleLogin" class="login-form">
@@ -33,7 +33,24 @@
             size="large" 
           />
         </el-form-item>
-        <el-form-item prop="password">
+        <el-form-item v-if="loginType==='owner'" prop="captcha" class="captcha-item">
+          <el-input 
+            v-model="form.captcha" 
+            placeholder="验证码" 
+            prefix-icon="Key"
+            size="large" 
+            style="flex: 1;"
+          />
+          <el-button 
+            @click="sendCaptcha" 
+            :disabled="captchaDisabled" 
+            size="large"
+            style="width: 120px;"
+          >
+            {{ captchaText }}
+          </el-button>
+        </el-form-item>
+        <el-form-item v-if="loginType==='admin'" prop="password">
           <el-input 
             v-model="form.password" 
             type="password" 
@@ -71,10 +88,12 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '../store/user'
 import { User, Lock, Iphone, Key, InfoFilled } from '@element-plus/icons-vue'
 import AppCard from '../components/AppCard.vue'
 
 const router = useRouter()
+const userStore = useUserStore()
 const loginForm = ref(null)
 const loading = ref(false)
 const loginType = ref('owner')
@@ -83,7 +102,14 @@ const captchaUrl = ref('/api/v1/user/getCaptchaImage?' + Date.now())
 const form = ref({
   userName: '',
   password: '',
-  mobile: ''
+  mobile: '',
+  captcha: ''
+})
+
+const captchaDisabled = ref(false)
+const captchaCountdown = ref(0)
+const captchaText = computed(() => {
+  return captchaCountdown.value > 0 ? `${captchaCountdown.value}秒后重发` : '获取验证码'
 })
 
 const rules = computed(() => {
@@ -98,13 +124,49 @@ const rules = computed(() => {
         { required: true, message: '请输入手机号', trigger: 'blur' },
         { pattern: /^1\d{10}$/, message: '手机号格式不正确', trigger: 'blur' }
       ],
-      password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+      captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
     }
   }
 })
 
 const refreshCaptcha = () => {
   captchaUrl.value = '/api/v1/user/getCaptchaImage?' + Date.now()
+}
+
+const sendCaptcha = async () => {
+  if (!form.value.mobile) {
+    ElMessage.error('请先输入手机号')
+    return
+  }
+  if (!/^1\d{10}$/.test(form.value.mobile)) {
+    ElMessage.error('手机号格式不正确')
+    return
+  }
+  
+  try {
+    const res = await fetch('/api/v1/auth/send-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: form.value.mobile })
+    })
+    const data = await res.json()
+    if (data.code === 200) {
+      ElMessage.success('验证码已发送')
+      captchaDisabled.value = true
+      captchaCountdown.value = 60
+      const timer = setInterval(() => {
+        captchaCountdown.value--
+        if (captchaCountdown.value <= 0) {
+          clearInterval(timer)
+          captchaDisabled.value = false
+        }
+      }, 1000)
+    } else {
+      ElMessage.error(data.message || '发送失败')
+    }
+  } catch (e) {
+    ElMessage.error('网络错误')
+  }
 }
 
 const handleLogin = async () => {
@@ -123,7 +185,7 @@ const handleLogin = async () => {
       url = '/api/v1/auth/login'
       body = {
         phone: form.value.mobile,
-        password: form.value.password
+        captcha: form.value.captcha
       }
     }
     const res = await fetch(url, {
@@ -132,9 +194,21 @@ const handleLogin = async () => {
       body: JSON.stringify(body)
     })
     const data = await res.json()
+    console.log('登录响应:', data) // 添加调试日志
     if (data.code === 200 && data.data && data.data.token) {
-      localStorage.setItem('token', data.data.token)
-      localStorage.setItem('user', JSON.stringify(data.data.user_info || {}))
+      // 使用 userStore 保存用户信息
+      userStore.setUser(data.data.userInfo || {}, data.data.token)
+      console.log('Token已保存:', data.data.token) // 添加调试日志
+      
+      // 如果是管理员登录，尝试获取小区信息
+      if (loginType.value === 'admin' && data.data.userInfo?.role !== 'SYSTEM_ADMIN') {
+        try {
+          await userStore.fetchCurrentCommunity()
+        } catch (error) {
+          console.error('获取小区信息失败:', error)
+        }
+      }
+      
       ElMessage.success('登录成功')
       if (loginType.value === 'admin') {
         router.replace('/admin/dashboard')
@@ -142,6 +216,7 @@ const handleLogin = async () => {
         router.replace('/votes')
       }
     } else {
+      console.error('登录失败:', data) // 添加调试日志
       ElMessage.error(data.message || '登录失败')
       refreshCaptcha()
     }
@@ -198,6 +273,10 @@ const goRegister = () => {
   display: flex;
   gap: var(--app-spacing-sm);
 }
+.captcha-item .el-form-item__content {
+  display: flex;
+  gap: var(--app-spacing-sm);
+}
 .captcha-image {
   height: 40px;
   border-radius: var(--app-border-radius-sm);
@@ -239,4 +318,4 @@ const goRegister = () => {
     margin: 32px auto;
   }
 }
-</style> 
+</style>

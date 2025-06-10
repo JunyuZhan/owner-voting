@@ -19,15 +19,20 @@ export function updateProfile(data) {
 }
 
 export function getOwnerList(params) {
-  return request.get('/admin-user/all', { params })
+  return request.get('/owner/list', { params })
 }
 
 export function reviewOwner(data) {
-  // 假设后端接口为 POST /admin-user/owner-review
-  return request.post('/admin-user/owner-review', data)
+  // 业主认证审核接口
+  return request.post('/owner/verification/review', data)
 }
 
 export function deleteOwner(id) {
-  // 假设后端接口为 DELETE /admin-user/delete/{id}
-  return request.delete(`/admin-user/delete/${id}`)
+  // 删除业主接口
+  return request.delete(`/owner/delete/${id}`)
+}
+
+export function addOwner(data) {
+  // 管理员新增业主接口
+  return request.post('/owner/admin/add', data)
 } 

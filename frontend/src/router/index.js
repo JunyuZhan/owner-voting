@@ -11,15 +11,24 @@ import SuggestionDetail from '../views/SuggestionDetail.vue'
 import SuggestionAdd from '../views/SuggestionAdd.vue'
 import PersonalCenter from '../views/PersonalCenter.vue'
 import Register from '../views/Register.vue'
+import CommunitySelect from '../views/CommunitySelect.vue'
+import HouseRegister from '../views/HouseRegister.vue'
+import HouseManagement from '../views/HouseManagement.vue'
 
 // Admin页面
-import AdminLayout from '../layouts/AdminLayout.vue'
+import AdminLayout from '../views/admin/AdminLayout.vue'
 import AdminVoteList from '../views/admin/AdminVoteList.vue'
 import AdminAnnouncementList from '../views/admin/AdminAnnouncementList.vue'
 import AdminOwnerList from '../views/admin/AdminOwnerList.vue'
 import AdminSuggestionList from '../views/admin/AdminSuggestionList.vue'
 import AdminLogList from '../views/admin/AdminLogList.vue'
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
+import CommunityManagement from '../views/admin/CommunityManagement.vue'
+import AdminProfile from '../views/admin/AdminProfile.vue'
+import AdManagement from '../views/admin/AdManagement.vue'
+import CommunityApplications from '../views/admin/CommunityApplications.vue'
+import CommunityAdminApplication from '../views/CommunityAdminApplication.vue'
+import CommunityAdminApplicationManagement from '../views/admin/CommunityAdminApplicationManagement.vue'
 
 const routes = [
   { 
@@ -44,6 +53,22 @@ const routes = [
     meta: {
       title: '注册',
       noLayout: true
+    } 
+  },
+  { 
+    path: '/community-select', 
+    component: CommunitySelect, 
+    meta: { 
+      title: '选择小区',
+      requiresOwner: true 
+    } 
+  },
+  { 
+    path: '/community-admin-application', 
+    component: CommunityAdminApplication, 
+    meta: { 
+      title: '申请小区管理员',
+      noLayout: true 
     } 
   },
   { 
@@ -87,9 +112,28 @@ const routes = [
     meta: { title: '建议详情' }
   },
   { 
-    path: '/personal', 
+    path: '/personal-center', 
     component: PersonalCenter,
-    meta: { title: '个人中心' }
+    meta: { 
+      title: '个人中心',
+      requiresOwner: true 
+    }
+  },
+  { 
+    path: '/house-register', 
+    component: HouseRegister,
+    meta: { 
+      title: '房屋注册',
+      requiresOwner: true 
+    }
+  },
+  { 
+    path: '/house-management', 
+    component: HouseManagement,
+    meta: { 
+      title: '房屋管理',
+      requiresOwner: true 
+    }
   },
   
   // 管理员路由
@@ -130,6 +174,40 @@ const routes = [
         path: 'logs', 
         component: AdminLogList,
         meta: { title: '日志管理' }
+      },
+      { 
+        path: 'communities', 
+        component: CommunityManagement,
+        meta: { 
+          title: '小区管理',
+          requiresSystemAdmin: true // 仅系统管理员可访问
+        }
+      },
+      { 
+        path: 'community-applications', 
+        component: CommunityApplications,
+        meta: { title: '业主申请审核' }
+      },
+      { 
+        path: 'admin-applications', 
+        component: CommunityAdminApplicationManagement,
+        meta: { 
+          title: '管理员申请审核',
+          requiresSystemAdmin: true // 仅系统管理员可访问
+        }
+      },
+      { 
+        path: 'profile', 
+        component: AdminProfile,
+        meta: { title: '个人设置' }
+      },
+      { 
+        path: 'ads', 
+        component: AdManagement,
+        meta: { 
+          title: '广告管理',
+          requiresSystemAdmin: true // 仅系统管理员可访问
+        }
       }
     ] 
   }
@@ -154,19 +232,40 @@ router.beforeEach((to, from, next) => {
   
   const token = localStorage.getItem('token')
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const currentCommunity = localStorage.getItem('currentCommunity')
   
+  // 未登录检查
   if (to.path !== '/' && to.path !== '/login' && to.path !== '/register' && !token) {
     next('/login')
-  } else if (to.meta.requiresAdmin) {
+    return
+  }
+  
+  // 管理员路由检查
+  if (to.meta.requiresAdmin) {
     const role = user.role
     if (role === 'SYSTEM_ADMIN' || role === 'COMMUNITY_ADMIN' || role === 'OPERATOR') {
-      next()
+      // 检查是否需要系统管理员权限
+      if (to.meta.requiresSystemAdmin && role !== 'SYSTEM_ADMIN') {
+        next('/admin/dashboard') // 重定向到仪表盘
+      } else {
+        next()
+      }
     } else {
       next('/')
     }
-  } else {
-    next()
+    return
   }
+  
+  // 业主路由检查
+  if (to.meta.requiresOwner && token) {
+    // 业主必须先选择小区（除了小区选择页面本身）
+    if (to.path !== '/community-select' && !currentCommunity && user.role !== 'SYSTEM_ADMIN' && user.role !== 'COMMUNITY_ADMIN') {
+      next('/community-select')
+      return
+    }
+  }
+  
+  next()
 })
 
 export default router 

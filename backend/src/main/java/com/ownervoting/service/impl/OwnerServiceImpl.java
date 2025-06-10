@@ -18,6 +18,10 @@ import com.ownervoting.model.entity.ReviewLog;
 import com.ownervoting.service.ReviewLogService;
 import com.ownervoting.service.SystemLogService;
 import com.ownervoting.model.entity.SystemLog;
+import com.ownervoting.model.dto.OwnerAddDTO;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class OwnerServiceImpl implements OwnerService {
@@ -33,6 +37,9 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Autowired
     private SystemLogService systemLogService;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -44,6 +51,46 @@ public class OwnerServiceImpl implements OwnerService {
         // 可根据实际需求添加更多校验逻辑
         return ownerRepository.save(owner);
     }
+    
+    @Override
+    @Transactional
+    public Owner addOwner(OwnerAddDTO dto) {
+        // 1. 检查手机号是否已被注册
+        if (ownerRepository.findByPhone(dto.getPhone()) != null) {
+            throw new BusinessException("该手机号已被注册");
+        }
+        
+        // 2. 创建Owner实体
+        Owner owner = new Owner();
+        owner.setName(dto.getName());
+        owner.setPhone(dto.getPhone());
+        owner.setIdCard(dto.getIdCard());
+        
+        // 3. 处理密码：如果没有提供密码，则生成默认密码
+        String password = dto.getPassword();
+        if (password == null || password.trim().isEmpty()) {
+            // 生成默认密码：手机号后6位
+            password = dto.getPhone().substring(5);
+        }
+        owner.setPasswordHash(passwordEncoder.encode(password));
+        
+        // 4. 设置初始状态
+        owner.setIsVerified(dto.getIsVerified() != null ? dto.getIsVerified() : false);
+        owner.setStatus(owner.getIsVerified() ? "APPROVED" : "PENDING");
+        
+        // 5. 保存业主
+        Owner saved = ownerRepository.save(owner);
+        
+        // 6. 记录系统日志
+        SystemLog sysLog = new SystemLog();
+        sysLog.setUserId(saved.getId());
+        sysLog.setUserType(SystemLog.UserType.OWNER);
+        sysLog.setOperation("管理员新增业主");
+        sysLog.setDetail("管理员创建业主账户：" + saved.getName() + "(" + saved.getPhone() + ")，默认密码：" + password);
+        systemLogService.addLog(sysLog);
+        
+        return saved;
+    }
 
     @Override
     public Owner findByPhone(String phone) {
@@ -53,6 +100,27 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Owner findById(Long id) {
         return ownerRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<Owner> findAll() {
+        return ownerRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public void deleteOwner(Long id) {
+        Owner owner = ownerRepository.findById(id)
+                .orElseThrow(() -> NotFoundException.of("业主", id));
+        ownerRepository.delete(owner);
+        
+        // 系统日志
+        SystemLog sysLog = new SystemLog();
+        sysLog.setUserId(id);
+        sysLog.setUserType(SystemLog.UserType.OWNER);
+        sysLog.setOperation("删除业主");
+        sysLog.setDetail("管理员删除业主：" + owner.getName());
+        systemLogService.addLog(sysLog);
     }
 
     @Override
@@ -136,6 +204,48 @@ public class OwnerServiceImpl implements OwnerService {
         sysLog.setUserType(SystemLog.UserType.OWNER);
         sysLog.setOperation("认证审核");
         sysLog.setDetail("业主认证审核，结果：" + dto.getStatus() + ", 审核人：" + dto.getReviewerName());
+        systemLogService.addLog(sysLog);
+    }
+
+    @Override
+    @Transactional
+    public void reviewVerification(Long ownerId, String status, String reviewComment) {
+        Owner owner = ownerRepository.findById(ownerId)
+                .orElseThrow(() -> NotFoundException.of("业主", ownerId));
+                
+        if (!"PENDING".equals(owner.getStatus())) {
+            throw new BusinessException("当前状态不可审核，状态：" + owner.getStatus());
+        }
+        
+        // 验证审核状态值的合法性
+        if (!("APPROVED".equals(status) || "REJECTED".equals(status))) {
+            throw new BusinessException("审核状态非法，只能是 APPROVED 或 REJECTED");
+        }
+        
+        // 设置业主状态
+        if ("APPROVED".equals(status)) {
+            owner.setStatus("APPROVED");
+            owner.setIsVerified(true);
+        } else {
+            owner.setStatus("REJECTED");
+            owner.setIsVerified(false);
+        }
+        ownerRepository.save(owner);
+        
+        // 写入审核日志
+        ReviewLog log = new ReviewLog();
+        log.setOwner(owner);
+        log.setReviewerName("管理员"); // 可以从SecurityContext获取当前用户
+        log.setStatus("APPROVED".equals(status) ? ReviewLog.Status.APPROVED : ReviewLog.Status.REJECTED);
+        log.setComment(reviewComment);
+        reviewLogService.addReviewLog(log);
+        
+        // 系统日志
+        SystemLog sysLog = new SystemLog();
+        sysLog.setUserId(owner.getId());
+        sysLog.setUserType(SystemLog.UserType.OWNER);
+        sysLog.setOperation("认证审核");
+        sysLog.setDetail("业主认证审核，结果：" + status + ", 审核意见：" + reviewComment);
         systemLogService.addLog(sysLog);
     }
 } 

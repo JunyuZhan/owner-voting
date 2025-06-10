@@ -49,4 +49,40 @@ public interface VoteResultService {
      * @return 总权重
      */
     BigDecimal calculateTotalWeight(Long topicId);
+    
+    /**
+     * 获取投票参与率统计
+     * @param topicId 投票主题ID
+     * @return 包含户数参与率和面积参与率的统计信息
+     */
+    Map<String, Object> getParticipationStats(Long topicId);
+    
+    /**
+     * 判断投票是否达到决议通过标准
+     * @param topicId 投票主题ID
+     * @param threshold 通过阈值（0.5表示过半数，0.67表示三分之二）
+     * @return 是否达到决议通过标准
+     */
+    Map<String, Object> checkDecisionValidity(Long topicId, BigDecimal threshold);
+    
+    /**
+     * 获取实时投票进度
+     * @param topicId 投票主题ID
+     * @return 实时进度信息，包括参与率、各选项得票率等
+     */
+    Map<String, Object> getRealTimeProgress(Long topicId);
+    
+    /**
+     * 计算小区总户数
+     * @param communityId 小区ID
+     * @return 总户数
+     */
+    int getTotalHouseholds(Long communityId);
+    
+    /**
+     * 计算小区总专有面积
+     * @param communityId 小区ID
+     * @return 总专有面积
+     */
+    BigDecimal getTotalArea(Long communityId);
 } 

@@ -21,7 +21,7 @@
 </template>
 
 <script setup>
-import { ref, provide, defineExpose } from 'vue';
+import { ref, provide } from 'vue';
 import { ElAlert, ElButton } from 'element-plus';
 
 // 错误状态

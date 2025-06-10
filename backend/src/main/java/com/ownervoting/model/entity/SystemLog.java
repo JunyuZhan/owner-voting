@@ -24,9 +24,10 @@ public class SystemLog {
     @Column(length = 50)
     private String ipAddress;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String detail;
 
+    @Column(name = "created_time")
     private LocalDateTime createdAt;
 
     @PrePersist

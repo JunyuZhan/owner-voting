@@ -41,7 +41,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getSuggestions, likeSuggestion } from '../api/suggestion'
+import { getSuggestionList, likeSuggestion } from '../api/suggestion'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import AppCard from '../components/AppCard.vue'
@@ -57,9 +57,13 @@ const likeLoadingId = ref(null)
 const fetchList = async () => {
   loading.value = true
   try {
-    const res = await getSuggestions({ page: page.value - 1, size: size.value })
-    list.value = res.list || res.data?.list || []
-    total.value = res.total || res.data?.total || 0
+    const res = await getSuggestionList()
+    console.log('获取建议列表响应:', res)
+    list.value = res.data || res.list || []
+    console.log('处理后的建议列表:', list.value)
+  } catch (error) {
+    console.error('获取建议列表失败:', error)
+    ElMessage.error('获取建议列表失败')
   } finally {
     loading.value = false
   }

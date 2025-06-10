@@ -1,0 +1,74 @@
+# 编译输出
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE文件
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# 依赖目录
+node_modules/
+
+# 环境配置文件（敏感信息）
+.env
+.env.local
+.env.production
+.env.staging
+application-local.properties
+application-prod.properties
+
+# 上传文件目录
+uploads/
+files/
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Gradle
+.gradle/
+gradlew
+gradlew.bat
+
+# Spring Boot
+spring-boot-*.jar
+
+# 测试覆盖率报告
+coverage/
+*.lcov
+
+# 备份文件
+*.bak
+*.backup

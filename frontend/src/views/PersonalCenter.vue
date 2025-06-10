@@ -16,6 +16,24 @@
           <el-tag :type="verifyStatusType">{{ verifyStatusText }}</el-tag>
         </el-descriptions-item>
       </el-descriptions>
+      
+      <!-- 房屋管理入口 -->
+      <el-divider />
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>我的房屋</h3>
+        <el-button type="primary" @click="goToHouseManagement">房屋管理</el-button>
+      </div>
+      <el-alert 
+        v-if="houseStats && houseStats.total > 0"
+        :title="`已注册 ${houseStats.total} 套房屋，其中 ${houseStats.approved} 套已认证`" 
+        type="info" 
+        :closable="false"
+        style="margin-bottom: 15px;" />
+      <div v-else style="padding: 20px; text-align: center; background: #f5f7fa; border-radius: 4px; margin-bottom: 15px;">
+        <p style="margin: 0; color: #909399;">您还未注册任何房屋</p>
+        <el-button type="primary" size="small" @click="goToHouseRegister" style="margin-top: 10px;">立即注册</el-button>
+      </div>
+      
       <el-divider />
       <h3>我的建议</h3>
       <el-table :data="mySuggestions" style="width: 100%" v-loading="loadingSuggestions">
@@ -41,6 +59,8 @@
         <el-table-column prop="optionText" label="我的选择" />
         <el-table-column prop="voteTime" label="投票时间" />
       </el-table>
+      
+      <!-- 修改密码对话框 -->
       <el-dialog v-model="showPwdDialog" title="修改密码" width="400px">
         <el-form :model="pwdForm" label-width="80px">
           <el-form-item label="原密码">
@@ -55,6 +75,8 @@
           <el-button type="primary" :loading="pwdLoading" @click="handleChangePwd">确定</el-button>
         </template>
       </el-dialog>
+      
+      <!-- 编辑信息对话框 -->
       <el-dialog v-model="showEditDialog" title="编辑信息" width="400px">
         <el-form :model="editForm" label-width="80px">
           <el-form-item label="姓名">
@@ -76,10 +98,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getVerifyStatus } from '../api/owner'
-import { getSuggestions } from '../api/suggestion'
+import { getMySuggestionList } from '../api/suggestion'
 import { useRouter } from 'vue-router'
 import { getMyVotes } from '../api/vote'
 import { changePassword, updateProfile } from '../api/owner'
+import { getOwnerHouses } from '../api/house'
 import { ElMessage } from 'element-plus'
 
 const user = JSON.parse(localStorage.getItem('user') || '{}')
@@ -88,6 +111,7 @@ const mySuggestions = ref([])
 const loadingSuggestions = ref(false)
 const myVotes = ref([])
 const loadingVotes = ref(false)
+const houseStats = ref(null)
 const router = useRouter()
 const showPwdDialog = ref(false)
 const showEditDialog = ref(false)
@@ -103,6 +127,7 @@ const verifyStatusText = computed(() => {
   if (verifyStatus.value.status === 'PENDING') return '待审核'
   return '未认证'
 })
+
 const verifyStatusType = computed(() => {
   if (!verifyStatus.value) return 'info'
   if (verifyStatus.value.status === 'APPROVED') return 'success'
@@ -113,17 +138,25 @@ const verifyStatusType = computed(() => {
 
 const fetchVerifyStatus = async () => {
   if (!user.id) return
-  verifyStatus.value = await getVerifyStatus(user.id)
-}
-const fetchMySuggestions = async () => {
-  loadingSuggestions.value = true
   try {
-    const res = await getSuggestions({ ownerId: user.id })
-    mySuggestions.value = res.list || res.data?.list || []
-  } finally {
-    loadingSuggestions.value = false
+    verifyStatus.value = await getVerifyStatus(user.id)
+  } catch (error) {
+    console.error('获取认证状态失败:', error)
   }
 }
+
+const fetchMySuggestions = async () => {
+  try {
+    const res = await getMySuggestionList(user.id)
+    console.log('获取我的建议列表响应:', res)
+    mySuggestions.value = res.data || res.list || []
+    console.log('处理后的我的建议列表:', mySuggestions.value)
+  } catch (error) {
+    console.error('获取我的建议列表失败:', error)
+    ElMessage.error('获取我的建议列表失败')
+  }
+}
+
 const fetchMyVotes = async () => {
   loadingVotes.value = true
   try {
@@ -133,23 +166,47 @@ const fetchMyVotes = async () => {
       optionText: r.optionText || r.voteOption?.optionText || '',
       voteTime: r.voteTime || r.createdAt || ''
     }))
+  } catch (error) {
+    console.error('获取投票记录失败:', error)
   } finally {
     loadingVotes.value = false
   }
 }
-onMounted(() => {
-  fetchVerifyStatus()
-  fetchMySuggestions()
-  fetchMyVotes()
-})
+
+const fetchHouseStats = async () => {
+  try {
+    const response = await getOwnerHouses(user.id)
+    const houses = response.data || []
+    
+    houseStats.value = {
+      total: houses.length,
+      approved: houses.filter(h => h.verificationStatus === 'APPROVED').length,
+      pending: houses.filter(h => h.verificationStatus === 'PENDING').length,
+      rejected: houses.filter(h => h.verificationStatus === 'REJECTED').length
+    }
+  } catch (error) {
+    console.error('获取房屋统计失败:', error)
+  }
+}
+
 const goSuggestionDetail = id => {
   router.push(`/suggestions/${id}`)
 }
+
+const goToHouseManagement = () => {
+  router.push('/house-management')
+}
+
+const goToHouseRegister = () => {
+  router.push('/house-register')
+}
+
 const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
   router.replace('/login')
 }
+
 const handleChangePwd = async () => {
   if (!pwdForm.value.oldPassword || !pwdForm.value.newPassword) {
     ElMessage.warning('请输入完整信息')
@@ -173,6 +230,7 @@ const handleChangePwd = async () => {
     pwdForm.value.newPassword = ''
   }
 }
+
 const handleEditProfile = async () => {
   if (!editForm.value.name || !editForm.value.phone) {
     ElMessage.warning('请输入完整信息')
@@ -196,11 +254,19 @@ const handleEditProfile = async () => {
     editLoading.value = false
   }
 }
+
+onMounted(() => {
+  fetchVerifyStatus()
+  fetchMySuggestions()
+  fetchMyVotes()
+  fetchHouseStats()
+})
 </script>
 
 <style scoped>
 .personal-center {
-  max-width: 900px;
-  margin: 40px auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
-</style> 
+</style>

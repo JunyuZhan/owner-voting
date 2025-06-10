@@ -1,8 +1,7 @@
 package com.ownervoting.config;
 
-import com.ownervoting.filter.XssFilter;
-import com.ownervoting.security.JwtAuthenticationFilter;
-import com.ownervoting.security.JwtAuthorizationFilter;
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,14 +15,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import com.ownervoting.filter.XssFilter;
+import com.ownervoting.security.JwtAuthorizationFilter;
+import com.ownervoting.security.TenantFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -35,6 +35,9 @@ public class SecurityConfig {
     
     @Autowired
     private XssFilter xssFilter;
+    
+    @Autowired
+    private TenantFilter tenantFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -49,10 +52,8 @@ public class SecurityConfig {
             .anonymous(anonymous -> anonymous.disable())
             // 启用CORS
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            // 配置CSRF
-            .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/api/v1/auth/login", "/api/v1/auth/admin/login", "/api/v1/auth/refresh"))
+            // 完全禁用CSRF，因为使用JWT认证的REST API不需要CSRF保护
+            .csrf(csrf -> csrf.disable())
             // 配置会话管理
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -63,27 +64,40 @@ public class SecurityConfig {
                 .frameOptions(frame -> frame.deny())
                 .xssProtection(xss -> xss.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
                 .contentTypeOptions(contentType -> contentType.disable()))
-            // 请求授权
-            .authorizeHttpRequests(auth -> auth
+            // 请求授权配置
+            .authorizeHttpRequests(authz -> authz
                 .requestMatchers(
                     "/api/v1/auth/login",
-                    "/api/v1/auth/admin/login",
+                    "/api/v1/auth/admin/login", 
                     "/api/v1/auth/refresh",
                     "/api/admin/login",
                     "/api/error/**",
+                    "/api/community/public",
+                    "/api/announcement/public",
+                    "/api/vote-topic/public",
+                    "/api/ad/current",
+                    "/api/ad/test",
+                    "/api/ad/click/**",
                     "/swagger-ui.html",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/swagger-resources/**",
                     "/webjars/**"
                 ).permitAll()
-                .requestMatchers("/api/admin/**").hasAnyRole("SYSTEM_ADMIN", "COMMUNITY_ADMIN")
+                .requestMatchers("/api/admin/**", "/api/admin-user/**").hasAnyRole("SYSTEM_ADMIN", "COMMUNITY_ADMIN", "OPERATOR")
                 .requestMatchers("/api/monitor/**").hasRole("SYSTEM_ADMIN")
-                .anyRequest().authenticated())
-            // 添加JWT过滤器
-            .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
-            // 添加XSS过滤器
-            .addFilterBefore(xssFilter, JwtAuthorizationFilter.class);
+                // 广告管理权限（除了公开的current和click接口）
+                .requestMatchers("/api/ad/list", "/api/ad/create", "/api/ad/update/**", "/api/ad/delete/**", "/api/ad/toggle/**", "/api/ad/detail/**").hasAnyRole("SYSTEM_ADMIN", "COMMUNITY_ADMIN", "OPERATOR")
+                // 需要管理员权限的操作
+                .requestMatchers("/api/announcement/add", "/api/announcement/delete/**").hasAnyRole("SYSTEM_ADMIN", "COMMUNITY_ADMIN", "OPERATOR")
+                .requestMatchers("/api/vote-topic/add", "/api/vote-topic/delete/**").hasAnyRole("SYSTEM_ADMIN", "COMMUNITY_ADMIN", "OPERATOR")
+                // 其他需要认证的请求
+                .anyRequest().authenticated()
+            )
+            // 添加过滤器链：XSS过滤器 -> JWT过滤器 -> 租户过滤器
+            .addFilterBefore(xssFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(jwtAuthorizationFilter, XssFilter.class)
+            .addFilterAfter(tenantFilter, JwtAuthorizationFilter.class);
 
         return http.build();
     }
@@ -101,17 +115,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://example.com", "http://localhost:3000"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList(
-            "Authorization", "Content-Type", "X-Requested-With", "Accept", 
-            "X-XSRF-TOKEN", "X-Frame-Options", "X-XSS-Protection"
-        ));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-} 
+}
